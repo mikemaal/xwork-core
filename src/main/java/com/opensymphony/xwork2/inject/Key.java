@@ -1,77 +1,63 @@
-/**
- * Copyright (C) 2006 Google Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package com.opensymphony.xwork2.inject;
+
+import java.io.Serializable;
 
 /**
  * Dependency mapping key. Uniquely identified by the required type and name.
  *
  * @author crazybob@google.com (Bob Lee)
  */
-class Key<T> {
+class Key<T> implements Serializable {
 
-  final Class<T> type;
-  final String name;
-  final int hashCode;
+   final Class<T> type;
 
-  private Key(Class<T> type, String name) {
-    if (type == null) {
-      throw new NullPointerException("Type is null.");
-    }
-    if (name == null) {
-      throw new NullPointerException("Name is null.");
-    }
+   final String name;
 
-    this.type = type;
-    this.name = name;
+   final int hashCode;
 
-    hashCode = type.hashCode() * 31 + name.hashCode();
-  }
+   private Key(Class<T> type, String name) {
+      if (type == null) {
+         throw new NullPointerException("Type is null.");
+      }
+      if (name == null) {
+         throw new NullPointerException("Name is null.");
+      }
+      this.type = type;
+      this.name = name;
+      hashCode = type.hashCode() * 31 + name.hashCode();
+   }
 
-  Class<T> getType() {
-    return type;
-  }
+   Class<T> getType() {
+      return type;
+   }
 
-  String getName() {
-    return name;
-  }
+   String getName() {
+      return name;
+   }
 
-  @Override
-  public int hashCode() {
-    return hashCode;
-  }
+   @Override
+   public int hashCode() {
+      return hashCode;
+   }
 
-  @Override
-  public boolean equals(Object o) {
-    if (!(o instanceof Key)) {
-      return false;
-    }
-    if (o == this) {
-      return true;
-    }
-    Key other = (Key) o;
-    return name.equals(other.name) && type.equals(other.type);
-  }
+   @Override
+   public boolean equals(Object o) {
+      if (!(o instanceof Key)) {
+         return false;
+      }
+      if (o == this) {
+         return true;
+      }
+      Key other = (Key) o;
+      return name.equals(other.name) && type.equals(other.type);
+   }
 
-  @Override
-  public String toString() {
-    return "[type=" + type.getName() + ", name='" + name + "']";
-  }
+   @Override
+   public String toString() {
+      return "[type=" + type.getName() + ", name='" + name + "']";
+   }
 
-  static <T> Key<T> newInstance(Class<T> type, String name) {
-    return new Key<T>(type, name);
-  }
+   static <T> Key<T> newInstance(Class<T> type, String name) {
+      return new Key<T>(type, name);
+   }
 }

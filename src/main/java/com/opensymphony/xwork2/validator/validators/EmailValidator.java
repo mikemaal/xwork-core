@@ -13,8 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.opensymphony.xwork2.validator.validators;
 
+import java.io.Serializable;
 
 /**
  * <!-- START SNIPPET: javadoc -->
@@ -76,15 +78,13 @@ package com.opensymphony.xwork2.validator.validators;
  * @author tm_jee
  * @version $Date: 2013-03-18 11:11:36 +0100 (Mon, 18 Mar 2013) $ $Id: EmailValidator.java 1457694 2013-03-18 10:11:36Z lukaszlenart $
  */
-public class EmailValidator extends RegexFieldValidator {
+public class EmailValidator extends RegexFieldValidator implements Serializable {
 
-	// see XW-371 
-    public static final String EMAIL_ADDRESS_PATTERN =
-    	"\\b^['_a-z0-9-\\+]+(\\.['_a-z0-9-\\+]+)*@[a-z0-9-]+(\\.[a-z0-9-]+)*\\.([a-z]{2}|aero|arpa|asia|biz|com|coop|edu|gov|info|int|jobs|mil|mobi|museum|name|nato|net|org|pro|tel|travel|xxx)$\\b";
+   // see XW-371 
+   public static final String EMAIL_ADDRESS_PATTERN = "\\b^['_a-z0-9-\\+]+(\\.['_a-z0-9-\\+]+)*@[a-z0-9-]+(\\.[a-z0-9-]+)*\\.([a-z]{2}|aero|arpa|asia|biz|com|coop|edu|gov|info|int|jobs|mil|mobi|museum|name|nato|net|org|pro|tel|travel|xxx)$\\b";
 
-    public EmailValidator() {
-        setRegex(EMAIL_ADDRESS_PATTERN);
-        setCaseSensitive(false);
-    }
-
+   public EmailValidator() {
+      setRegex(EMAIL_ADDRESS_PATTERN);
+      setCaseSensitive(false);
+   }
 }

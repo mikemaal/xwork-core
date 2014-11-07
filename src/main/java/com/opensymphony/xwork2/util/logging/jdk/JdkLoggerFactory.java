@@ -13,23 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.opensymphony.xwork2.util.logging.jdk;
 
 import com.opensymphony.xwork2.util.logging.Logger;
 import com.opensymphony.xwork2.util.logging.LoggerFactory;
+import java.io.Serializable;
 
 /**
  * Creates jdk loggers
  */
-public class JdkLoggerFactory extends LoggerFactory {
+public class JdkLoggerFactory extends LoggerFactory implements Serializable {
 
-    @Override
-    protected Logger getLoggerImpl(Class<?> cls) {
-        return new JdkLogger(java.util.logging.Logger.getLogger(cls.getName()));
-    }
-    
-    @Override
-    protected Logger getLoggerImpl(String name) {
-        return new JdkLogger(java.util.logging.Logger.getLogger(name));
-    }
+   @Override
+   protected Logger getLoggerImpl(Class<?> cls) {
+      return new JdkLogger(java.util.logging.Logger.getLogger(cls.getName()));
+   }
+
+   @Override
+   protected Logger getLoggerImpl(String name) {
+      return new JdkLogger(java.util.logging.Logger.getLogger(name));
+   }
 }

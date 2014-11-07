@@ -13,26 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.opensymphony.xwork2.ognl;
 
 import com.opensymphony.xwork2.conversion.TypeConverter;
-
 import java.lang.reflect.Member;
 import java.util.Map;
+import java.io.Serializable;
 
 /**
  * Wraps an OGNL TypeConverter as an XWork TypeConverter
  */
-public class XWorkTypeConverterWrapper implements TypeConverter {
+public class XWorkTypeConverterWrapper implements TypeConverter, Serializable {
 
-    private ognl.TypeConverter typeConverter;
-    
-    public XWorkTypeConverterWrapper(ognl.TypeConverter conv) {
-        this.typeConverter = conv;
-    }
-    
-    public Object convertValue(Map context, Object target, Member member,
-            String propertyName, Object value, Class toType) {
-        return typeConverter.convertValue(context, target, member, propertyName, value, toType);
-    }
+   private ognl.TypeConverter typeConverter;
+
+   public XWorkTypeConverterWrapper(ognl.TypeConverter conv) {
+      this.typeConverter = conv;
+   }
+
+   public Object convertValue(Map context, Object target, Member member, String propertyName, Object value, Class toType) {
+      return typeConverter.convertValue(context, target, member, propertyName, value, toType);
+   }
 }

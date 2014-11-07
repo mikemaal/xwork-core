@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.opensymphony.xwork2.validator.validators;
 
 import com.opensymphony.xwork2.validator.ValidationException;
-
+import java.io.Serializable;
 
 /**
  * <!-- START SNIPPET: javadoc -->
@@ -70,39 +71,35 @@ import com.opensymphony.xwork2.validator.ValidationException;
  * @author rainerh
  * @version $Date: 2013-01-13 14:05:21 +0100 (Sun, 13 Jan 2013) $ $Id: RequiredStringValidator.java 1432603 2013-01-13 13:05:21Z lukaszlenart $
  */
-public class RequiredStringValidator extends FieldValidatorSupport {
+public class RequiredStringValidator extends FieldValidatorSupport implements Serializable {
 
-    private boolean trim = true;
+   private boolean trim = true;
 
-    public void setTrim(boolean trim) {
-        this.trim = trim;
-    }
+   public void setTrim(boolean trim) {
+      this.trim = trim;
+   }
 
-    public void setTrimExpression(String trimExpression) {
-        trim = (Boolean) parse(trimExpression, Boolean.class);
-    }
+   public void setTrimExpression(String trimExpression) {
+      trim = (Boolean) parse(trimExpression, Boolean.class);
+   }
 
-    public boolean isTrim() {
-        return trim;
-    }
+   public boolean isTrim() {
+      return trim;
+   }
 
-    public void validate(Object object) throws ValidationException {
-        String fieldName = getFieldName();
-        Object value = this.getFieldValue(fieldName, object);
-
-        if (!(value instanceof String)) {
+   public void validate(Object object) throws ValidationException {
+      String fieldName = getFieldName();
+      Object value = this.getFieldValue(fieldName, object);
+      if (!(value instanceof String)) {
+         addFieldError(fieldName, object);
+      } else {
+         String s = (String) value;
+         if (trim) {
+            s = s.trim();
+         }
+         if (s.length() == 0) {
             addFieldError(fieldName, object);
-        } else {
-            String s = (String) value;
-
-            if (trim) {
-                s = s.trim();
-            }
-
-            if (s.length() == 0) {
-                addFieldError(fieldName, object);
-            }
-        }
-    }
-
+         }
+      }
+   }
 }

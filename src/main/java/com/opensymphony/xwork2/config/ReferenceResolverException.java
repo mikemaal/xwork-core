@@ -13,31 +13,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.opensymphony.xwork2.config;
 
 import com.opensymphony.xwork2.XWorkException;
-
+import java.io.Serializable;
 
 /**
  * Exception when a reference can't be resolved.
  *
  * @author Mike
  */
-public class ReferenceResolverException extends XWorkException {
+public class ReferenceResolverException extends XWorkException implements Serializable {
 
-    public ReferenceResolverException() {
-        super();
-    }
+   public ReferenceResolverException() {
+      super();
+   }
 
-    public ReferenceResolverException(String s) {
-        super(s);
-    }
+   public ReferenceResolverException(String s) {
+      super(s);
+   }
 
-    public ReferenceResolverException(String s, Throwable cause) {
-        super(s, cause);
-    }
+   public ReferenceResolverException(String s, Throwable cause) {
+      super(s, cause);
+   }
 
-    public ReferenceResolverException(Throwable cause) {
-        super(cause);
-    }
+   public ReferenceResolverException(Throwable cause) {
+      super(cause);
+   }
 }

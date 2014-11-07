@@ -13,9 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.opensymphony.xwork2.validator.validators;
 
 import java.util.Date;
+import java.io.Serializable;
 
 /**
  * <!-- START SNIPPET: javadoc -->
@@ -86,10 +88,9 @@ import java.util.Date;
  * @author Jason Carreira
  * @version $Date: 2013-01-09 23:21:56 +0100 (Wed, 09 Jan 2013) $ $Id: DateRangeFieldValidator.java 1431115 2013-01-09 22:21:56Z lukaszlenart $
  */
-public class DateRangeFieldValidator extends AbstractRangeValidator<Date> {
+public class DateRangeFieldValidator extends AbstractRangeValidator<Date> implements Serializable {
 
-    public DateRangeFieldValidator() {
-        super(Date.class);
-    }
-
+   public DateRangeFieldValidator() {
+      super(Date.class);
+   }
 }

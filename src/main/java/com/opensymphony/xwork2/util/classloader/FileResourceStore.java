@@ -13,67 +13,67 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.opensymphony.xwork2.util.classloader;
 
 import com.opensymphony.xwork2.util.logging.Logger;
 import com.opensymphony.xwork2.util.logging.LoggerFactory;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-
+import java.io.Serializable;
 
 /**
  * Reads a class from disk
  *  class taken from Apache JCI
  */
-public final class FileResourceStore implements ResourceStore {
-    private static final Logger LOG = LoggerFactory.getLogger(FileResourceStore.class);
-    private final File root;
+public final class FileResourceStore implements ResourceStore, Serializable {
 
-    public FileResourceStore(final File pFile) {
-        root = pFile;
-    }
+   private static final Logger LOG = LoggerFactory.getLogger(FileResourceStore.class);
 
-    public byte[] read(final String pResourceName) {
-        FileInputStream fis = null;
-        try {
-            File file = getFile(pResourceName);
-            byte[] data = new byte[(int) file.length()];
-            fis = new FileInputStream(file);
-            fis.read(data);
+   private final File root;
 
-            return data;
-        } catch (Exception e) {
-            if (LOG.isDebugEnabled())
-                LOG.debug("Unable to read file [#0]", e, pResourceName);
-            return null;
-        } finally {
-            closeQuietly(fis);
-        }
-    }
+   public FileResourceStore(final File pFile) {
+      root = pFile;
+   }
 
-    public void write(final String pResourceName, final byte[] pData) {
+   public byte[] read(final String pResourceName) {
+      FileInputStream fis = null;
+      try {
+         File file = getFile(pResourceName);
+         byte[] data = new byte[(int) file.length()];
+         fis = new FileInputStream(file);
+         fis.read(data);
+         return data;
+      } catch (Exception e) {
+         if (LOG.isDebugEnabled())
+            LOG.debug("Unable to read file [#0]", e, pResourceName);
+         return null;
+      } finally {
+         closeQuietly(fis);
+      }
+   }
 
-    }
+   public void write(final String pResourceName, final byte[] pData) {
+   }
 
-    private void closeQuietly(InputStream is) {
-        try {
-            if (is != null)
-                is.close();
-        } catch (IOException e) {
-            if (LOG.isErrorEnabled())
-                LOG.error("Unable to close file input stream", e);
-        }
-    }
+   private void closeQuietly(InputStream is) {
+      try {
+         if (is != null)
+            is.close();
+      } catch (IOException e) {
+         if (LOG.isErrorEnabled())
+            LOG.error("Unable to close file input stream", e);
+      }
+   }
 
-    private File getFile(final String pResourceName) {
-        final String fileName = pResourceName.replace('/', File.separatorChar);
-        return new File(root, fileName);
-    }
+   private File getFile(final String pResourceName) {
+      final String fileName = pResourceName.replace('/', File.separatorChar);
+      return new File(root, fileName);
+   }
 
-    public String toString() {
-        return this.getClass().getName() + root.toString();
-    }
+   public String toString() {
+      return this.getClass().getName() + root.toString();
+   }
 }

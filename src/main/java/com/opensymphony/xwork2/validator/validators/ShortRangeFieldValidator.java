@@ -13,7 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.opensymphony.xwork2.validator.validators;
+
+import java.io.Serializable;
 
 /**
  * <!-- START SNIPPET: javadoc -->
@@ -73,10 +76,9 @@ package com.opensymphony.xwork2.validator.validators;
  *
  * @version $Date: 2013-01-09 23:21:56 +0100 (Wed, 09 Jan 2013) $
  */
-public class ShortRangeFieldValidator extends AbstractRangeValidator<Short> {
+public class ShortRangeFieldValidator extends AbstractRangeValidator<Short> implements Serializable {
 
-    public ShortRangeFieldValidator() {
-        super(Short.class);
-    }
-
+   public ShortRangeFieldValidator() {
+      super(Short.class);
+   }
 }

@@ -17,7 +17,7 @@
 package com.opensymphony.xwork2.conversion.impl;
 
 import com.opensymphony.xwork2.util.reflection.ReflectionProvider;
-
+import java.io.Serializable;
 
 /**
  * GenericsObjectTypeDeterminer
@@ -29,10 +29,10 @@ import com.opensymphony.xwork2.util.reflection.ReflectionProvider;
  * @deprecated Use DefaultObjectTypeDeterminer instead. Since XWork 2.0.4 the DefaultObjectTypeDeterminer handles the
  *             annotation processing.
  */
-@Deprecated public class GenericsObjectTypeDeterminer extends DefaultObjectTypeDeterminer {
+@Deprecated
+public class GenericsObjectTypeDeterminer extends DefaultObjectTypeDeterminer implements Serializable {
 
-    public GenericsObjectTypeDeterminer(XWorkConverter conv,
-            XWorkBasicConverter basicConv, ReflectionProvider prov) {
-        super(conv, prov);
-    }
+   public GenericsObjectTypeDeterminer(XWorkConverter conv, XWorkBasicConverter basicConv, ReflectionProvider prov) {
+      super(conv, prov);
+   }
 }

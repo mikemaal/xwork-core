@@ -16,6 +16,8 @@
 
 package com.opensymphony.xwork2.ognl;
 
+import java.io.Serializable;
+
 /**
  * An Object to use within OGNL to proxy other Objects
  * usually Collections that you set in a different place
@@ -24,32 +26,35 @@ package com.opensymphony.xwork2.ognl;
  *
  * @author Gabe
  */
-public class ObjectProxy {
-    private Object value;
-    private Class lastClassAccessed;
-    private String lastPropertyAccessed;
+public class ObjectProxy implements Serializable {
 
-    public Class getLastClassAccessed() {
-        return lastClassAccessed;
-    }
+   private Object value;
 
-    public void setLastClassAccessed(Class lastClassAccessed) {
-        this.lastClassAccessed = lastClassAccessed;
-    }
+   private Class lastClassAccessed;
 
-    public String getLastPropertyAccessed() {
-        return lastPropertyAccessed;
-    }
+   private String lastPropertyAccessed;
 
-    public void setLastPropertyAccessed(String lastPropertyAccessed) {
-        this.lastPropertyAccessed = lastPropertyAccessed;
-    }
+   public Class getLastClassAccessed() {
+      return lastClassAccessed;
+   }
 
-    public Object getValue() {
-        return value;
-    }
+   public void setLastClassAccessed(Class lastClassAccessed) {
+      this.lastClassAccessed = lastClassAccessed;
+   }
 
-    public void setValue(Object value) {
-        this.value = value;
-    }
+   public String getLastPropertyAccessed() {
+      return lastPropertyAccessed;
+   }
+
+   public void setLastPropertyAccessed(String lastPropertyAccessed) {
+      this.lastPropertyAccessed = lastPropertyAccessed;
+   }
+
+   public Object getValue() {
+      return value;
+   }
+
+   public void setValue(Object value) {
+      this.value = value;
+   }
 }

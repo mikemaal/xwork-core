@@ -13,12 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.opensymphony.xwork2.interceptor;
 
 import com.opensymphony.xwork2.ActionInvocation;
 import com.opensymphony.xwork2.util.logging.Logger;
 import com.opensymphony.xwork2.util.logging.LoggerFactory;
-
+import java.io.Serializable;
 
 /**
  * <!-- START SNIPPET: description -->
@@ -56,33 +57,33 @@ import com.opensymphony.xwork2.util.logging.LoggerFactory;
  *
  * @author Jason Carreira
  */
-public class LoggingInterceptor extends AbstractInterceptor {
-    private static final Logger LOG = LoggerFactory.getLogger(LoggingInterceptor.class);
-    private static final String FINISH_MESSAGE = "Finishing execution stack for action ";
-    private static final String START_MESSAGE = "Starting execution stack for action ";
+public class LoggingInterceptor extends AbstractInterceptor implements Serializable {
 
-    @Override
-    public String intercept(ActionInvocation invocation) throws Exception {
-        logMessage(invocation, START_MESSAGE);
-        String result = invocation.invoke();
-        logMessage(invocation, FINISH_MESSAGE);
-        return result;
-    }
+   private static final Logger LOG = LoggerFactory.getLogger(LoggingInterceptor.class);
 
-    private void logMessage(ActionInvocation invocation, String baseMessage) {
-        if (LOG.isInfoEnabled()) {
-            StringBuilder message = new StringBuilder(baseMessage);
-            String namespace = invocation.getProxy().getNamespace();
+   private static final String FINISH_MESSAGE = "Finishing execution stack for action ";
 
-            if ((namespace != null) && (namespace.trim().length() > 0)) {
-                message.append(namespace).append("/");
-            }
+   private static final String START_MESSAGE = "Starting execution stack for action ";
 
-            message.append(invocation.getProxy().getActionName());
-            if (LOG.isInfoEnabled()) {
-        	LOG.info(message.toString());
-            }
-        }
-    }
+   @Override
+   public String intercept(ActionInvocation invocation) throws Exception {
+      logMessage(invocation, START_MESSAGE);
+      String result = invocation.invoke();
+      logMessage(invocation, FINISH_MESSAGE);
+      return result;
+   }
 
+   private void logMessage(ActionInvocation invocation, String baseMessage) {
+      if (LOG.isInfoEnabled()) {
+         StringBuilder message = new StringBuilder(baseMessage);
+         String namespace = invocation.getProxy().getNamespace();
+         if ((namespace != null) && (namespace.trim().length() > 0)) {
+            message.append(namespace).append("/");
+         }
+         message.append(invocation.getProxy().getActionName());
+         if (LOG.isInfoEnabled()) {
+            LOG.info(message.toString());
+         }
+      }
+   }
 }

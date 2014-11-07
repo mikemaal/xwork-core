@@ -13,16 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.opensymphony.xwork2.interceptor;
 
 import com.opensymphony.xwork2.ActionInvocation;
 import com.opensymphony.xwork2.config.entities.ExceptionMappingConfig;
 import com.opensymphony.xwork2.util.logging.Logger;
 import com.opensymphony.xwork2.util.logging.LoggerFactory;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.io.Serializable;
 
 /**
  * <!-- START SNIPPET: description -->
@@ -147,177 +148,176 @@ import java.util.Map;
  * @author Matthew E. Porter (matthew dot porter at metissian dot com) 
  * @author Claus Ibsen
  */
-public class ExceptionMappingInterceptor extends AbstractInterceptor {
-    
-    protected static final Logger LOG = LoggerFactory.getLogger(ExceptionMappingInterceptor.class);
+public class ExceptionMappingInterceptor extends AbstractInterceptor implements Serializable {
 
-    protected Logger categoryLogger;
-    protected boolean logEnabled = false;
-    protected String logCategory;
-    protected String logLevel;
-    
+   protected static final Logger LOG = LoggerFactory.getLogger(ExceptionMappingInterceptor.class);
 
-    public boolean isLogEnabled() {
-        return logEnabled;
-    }
+   protected Logger categoryLogger;
 
-    public void setLogEnabled(boolean logEnabled) {
-        this.logEnabled = logEnabled;
-    }
+   protected boolean logEnabled = false;
 
-    public String getLogCategory() {
-		return logCategory;
-	}
+   protected String logCategory;
 
-	public void setLogCategory(String logCatgory) {
-		this.logCategory = logCatgory;
-	}
+   protected String logLevel;
 
-	public String getLogLevel() {
-		return logLevel;
-	}
+   public boolean isLogEnabled() {
+      return logEnabled;
+   }
 
-	public void setLogLevel(String logLevel) {
-		this.logLevel = logLevel;
-	}
+   public void setLogEnabled(boolean logEnabled) {
+      this.logEnabled = logEnabled;
+   }
 
-    @Override
-    public String intercept(ActionInvocation invocation) throws Exception {
-        String result;
+   public String getLogCategory() {
+      return logCategory;
+   }
 
-        try {
-            result = invocation.invoke();
-        } catch (Exception e) {
-            if (isLogEnabled()) {
-                handleLogging(e);
+   public void setLogCategory(String logCatgory) {
+      this.logCategory = logCatgory;
+   }
+
+   public String getLogLevel() {
+      return logLevel;
+   }
+
+   public void setLogLevel(String logLevel) {
+      this.logLevel = logLevel;
+   }
+
+   @Override
+   public String intercept(ActionInvocation invocation) throws Exception {
+      String result;
+      try {
+         result = invocation.invoke();
+      } catch (Exception e) {
+         if (isLogEnabled()) {
+            handleLogging(e);
+         }
+         List<ExceptionMappingConfig> exceptionMappings = invocation.getProxy().getConfig().getExceptionMappings();
+         ExceptionMappingConfig mappingConfig = this.findMappingFromExceptions(exceptionMappings, e);
+         if (mappingConfig != null && mappingConfig.getResult() != null) {
+            Map parameterMap = mappingConfig.getParams();
+            // create a mutable HashMap since some interceptors will remove parameters, and parameterMap is immutable
+            invocation.getInvocationContext().setParameters(new HashMap<String, Object>(parameterMap));
+            result = mappingConfig.getResult();
+            publishException(invocation, new ExceptionHolder(e));
+         } else {
+            throw e;
+         }
+      }
+      return result;
+   }
+
+   /**
+    * Handles the logging of the exception.
+    * 
+    * @param e  the exception to log.
+    */
+   protected void handleLogging(Exception e) {
+      if (logCategory != null) {
+         if (categoryLogger == null) {
+            // init category logger
+            categoryLogger = LoggerFactory.getLogger(logCategory);
+         }
+         doLog(categoryLogger, e);
+      } else {
+         doLog(LOG, e);
+      }
+   }
+
+   /**
+    * Performs the actual logging.
+    * 
+    * @param logger  the provided logger to use.
+    * @param e  the exception to log.
+    */
+   protected void doLog(Logger logger, Exception e) {
+      if (logLevel == null) {
+         logger.debug(e.getMessage(), e);
+         return;
+      }
+      if ("trace".equalsIgnoreCase(logLevel)) {
+         logger.trace(e.getMessage(), e);
+      } else if ("debug".equalsIgnoreCase(logLevel)) {
+         logger.debug(e.getMessage(), e);
+      } else if ("info".equalsIgnoreCase(logLevel)) {
+         logger.info(e.getMessage(), e);
+      } else if ("warn".equalsIgnoreCase(logLevel)) {
+         logger.warn(e.getMessage(), e);
+      } else if ("error".equalsIgnoreCase(logLevel)) {
+         logger.error(e.getMessage(), e);
+      } else if ("fatal".equalsIgnoreCase(logLevel)) {
+         logger.fatal(e.getMessage(), e);
+      } else {
+         throw new IllegalArgumentException("LogLevel [" + logLevel + "] is not supported");
+      }
+   }
+
+   /**
+    * @deprecated since 2.3.15 please use #findMappingFromExceptions directly instead
+    */
+   protected String findResultFromExceptions(List<ExceptionMappingConfig> exceptionMappings, Throwable t) {
+      ExceptionMappingConfig result = findMappingFromExceptions(exceptionMappings, t);
+      return result == null ? null : result.getResult();
+   }
+
+   /**
+    * Try to find appropriate {@link ExceptionMappingConfig} based on provided Throwable
+    *
+    * @param exceptionMappings list of defined exception mappings
+    * @param t caught exception
+    * @return appropriate mapping or null
+    */
+   protected ExceptionMappingConfig findMappingFromExceptions(List<ExceptionMappingConfig> exceptionMappings,
+         Throwable t) {
+      ExceptionMappingConfig config = null;
+      // Check for specific exception mappings.
+      if (exceptionMappings != null) {
+         int deepest = Integer.MAX_VALUE;
+         for (Object exceptionMapping : exceptionMappings) {
+            ExceptionMappingConfig exceptionMappingConfig = (ExceptionMappingConfig) exceptionMapping;
+            int depth = getDepth(exceptionMappingConfig.getExceptionClassName(), t);
+            if (depth >= 0 && depth < deepest) {
+               deepest = depth;
+               config = exceptionMappingConfig;
             }
-            List<ExceptionMappingConfig> exceptionMappings = invocation.getProxy().getConfig().getExceptionMappings();
-            ExceptionMappingConfig mappingConfig = this.findMappingFromExceptions(exceptionMappings, e);
-            if (mappingConfig != null && mappingConfig.getResult()!=null) {
-                Map parameterMap = mappingConfig.getParams();
-                // create a mutable HashMap since some interceptors will remove parameters, and parameterMap is immutable
-                invocation.getInvocationContext().setParameters(new HashMap<String, Object>(parameterMap));
-                result = mappingConfig.getResult();
-                publishException(invocation, new ExceptionHolder(e));
-            } else {
-                throw e;
-            }
-        }
+         }
+      }
+      return config;
+   }
 
-        return result;
-    }
+   /**
+    * Return the depth to the superclass matching. 0 means ex matches exactly. Returns -1 if there's no match.
+    * Otherwise, returns depth. Lowest depth wins.
+    *
+    * @param exceptionMapping  the mapping classname
+    * @param t  the cause
+    * @return the depth, if not found -1 is returned.
+    */
+   public int getDepth(String exceptionMapping, Throwable t) {
+      return getDepth(exceptionMapping, t.getClass(), 0);
+   }
 
-    /**
-     * Handles the logging of the exception.
-     * 
-     * @param e  the exception to log.
-     */
-    protected void handleLogging(Exception e) {
-    	if (logCategory != null) {
-        	if (categoryLogger == null) {
-        		// init category logger
-        		categoryLogger = LoggerFactory.getLogger(logCategory);
-        	}
-        	doLog(categoryLogger, e);
-    	} else {
-    		doLog(LOG, e);
-    	}
-    }
-    
-    /**
-     * Performs the actual logging.
-     * 
-     * @param logger  the provided logger to use.
-     * @param e  the exception to log.
-     */
-    protected void doLog(Logger logger, Exception e) {
-    	if (logLevel == null) {
-    		logger.debug(e.getMessage(), e);
-    		return;
-    	}
-    	
-    	if ("trace".equalsIgnoreCase(logLevel)) {
-    		logger.trace(e.getMessage(), e);
-    	} else if ("debug".equalsIgnoreCase(logLevel)) {
-    		logger.debug(e.getMessage(), e);
-    	} else if ("info".equalsIgnoreCase(logLevel)) {
-    		logger.info(e.getMessage(), e);
-    	} else if ("warn".equalsIgnoreCase(logLevel)) {
-    		logger.warn(e.getMessage(), e);
-    	} else if ("error".equalsIgnoreCase(logLevel)) {
-    		logger.error(e.getMessage(), e);
-    	} else if ("fatal".equalsIgnoreCase(logLevel)) {
-    		logger.fatal(e.getMessage(), e);
-    	} else {
-    		throw new IllegalArgumentException("LogLevel [" + logLevel + "] is not supported");
-    	}
-    }
+   private int getDepth(String exceptionMapping, Class exceptionClass, int depth) {
+      if (exceptionClass.getName().contains(exceptionMapping)) {
+         // Found it!
+         return depth;
+      }
+      // If we've gone as far as we can go and haven't found it...
+      if (exceptionClass.equals(Throwable.class)) {
+         return -1;
+      }
+      return getDepth(exceptionMapping, exceptionClass.getSuperclass(), depth + 1);
+   }
 
-    /**
-     * @deprecated since 2.3.15 please use #findMappingFromExceptions directly instead
-     */
-    protected String findResultFromExceptions(List<ExceptionMappingConfig> exceptionMappings, Throwable t) {
-    	ExceptionMappingConfig result = findMappingFromExceptions(exceptionMappings, t);
-        return result==null?null:result.getResult();
-    }
-
-    /**
-     * Try to find appropriate {@link ExceptionMappingConfig} based on provided Throwable
-     *
-     * @param exceptionMappings list of defined exception mappings
-     * @param t caught exception
-     * @return appropriate mapping or null
-     */
-    protected ExceptionMappingConfig findMappingFromExceptions(List<ExceptionMappingConfig> exceptionMappings, Throwable t) {
-    	ExceptionMappingConfig config = null;
-        // Check for specific exception mappings.
-        if (exceptionMappings != null) {
-            int deepest = Integer.MAX_VALUE;
-            for (Object exceptionMapping : exceptionMappings) {
-                ExceptionMappingConfig exceptionMappingConfig = (ExceptionMappingConfig) exceptionMapping;
-                int depth = getDepth(exceptionMappingConfig.getExceptionClassName(), t);
-                if (depth >= 0 && depth < deepest) {
-                    deepest = depth;
-                    config = exceptionMappingConfig;
-                }
-            }
-        }
-        return config;
-    }
-
-    /**
-     * Return the depth to the superclass matching. 0 means ex matches exactly. Returns -1 if there's no match.
-     * Otherwise, returns depth. Lowest depth wins.
-     *
-     * @param exceptionMapping  the mapping classname
-     * @param t  the cause
-     * @return the depth, if not found -1 is returned.
-     */
-    public int getDepth(String exceptionMapping, Throwable t) {
-        return getDepth(exceptionMapping, t.getClass(), 0);
-    }
-
-    private int getDepth(String exceptionMapping, Class exceptionClass, int depth) {
-        if (exceptionClass.getName().contains(exceptionMapping)) {
-            // Found it!
-            return depth;
-        }
-        // If we've gone as far as we can go and haven't found it...
-        if (exceptionClass.equals(Throwable.class)) {
-            return -1;
-        }
-        return getDepth(exceptionMapping, exceptionClass.getSuperclass(), depth + 1);
-    }
-
-    /**
-     * Default implementation to handle ExceptionHolder publishing. Pushes given ExceptionHolder on the stack.
-     * Subclasses may override this to customize publishing.
-     *
-     * @param invocation The invocation to publish Exception for.
-     * @param exceptionHolder The exceptionHolder wrapping the Exception to publish.
-     */
-    protected void publishException(ActionInvocation invocation, ExceptionHolder exceptionHolder) {
-        invocation.getStack().push(exceptionHolder);
-    }
-
+   /**
+    * Default implementation to handle ExceptionHolder publishing. Pushes given ExceptionHolder on the stack.
+    * Subclasses may override this to customize publishing.
+    *
+    * @param invocation The invocation to publish Exception for.
+    * @param exceptionHolder The exceptionHolder wrapping the Exception to publish.
+    */
+   protected void publishException(ActionInvocation invocation, ExceptionHolder exceptionHolder) {
+      invocation.getStack().push(exceptionHolder);
+   }
 }

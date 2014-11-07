@@ -20,9 +20,9 @@ import com.opensymphony.xwork2.util.logging.Logger;
 import com.opensymphony.xwork2.util.logging.LoggerFactory;
 import com.opensymphony.xwork2.validator.ValidationException;
 import org.apache.commons.lang3.StringUtils;
-
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.io.Serializable;
 
 /**
  * <!-- START SNIPPET: javadoc -->
@@ -78,137 +78,136 @@ import java.util.regex.Pattern;
  * @author Quake Wang
  * @version $Date: 2013-03-15 22:44:43 +0100 (Fri, 15 Mar 2013) $ $Revision: 1457137 $
  */
-public class RegexFieldValidator extends FieldValidatorSupport {
+public class RegexFieldValidator extends FieldValidatorSupport implements Serializable {
 
-    private static final Logger LOG = LoggerFactory.getLogger(RegexFieldValidator.class);
+   private static final Logger LOG = LoggerFactory.getLogger(RegexFieldValidator.class);
 
-    private String regex;
-    private String regexExpression;
-    private Boolean caseSensitive = true;
-    private String caseSensitiveExpression = "";
-    private Boolean trim = true;
-    private String trimExpression = "";
+   private String regex;
 
-    public void validate(Object object) throws ValidationException {
-        String fieldName = getFieldName();
-        Object value = this.getFieldValue(fieldName, object);
-        // if there is no value - don't do comparison
-        // if a value is required, a required validator should be added to the field
-        String regexToUse = getRegex();
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Defined regexp as [#0]", regexToUse);
-        }
-        if (value == null || regexToUse == null) {
-            return;
-        }
+   private String regexExpression;
 
-        // XW-375 - must be a string
-        if (!(value instanceof String)) {
-            return;
-        }
+   private Boolean caseSensitive = true;
 
-        // string must not be empty
-        String str = ((String) value).trim();
-        if (str.length() == 0) {
-            return;
-        }
+   private String caseSensitiveExpression = "";
 
-        // match against expression
-        Pattern pattern;
-        if (isCaseSensitive()) {
-            pattern = Pattern.compile(regexToUse);
-        } else {
-            pattern = Pattern.compile(regexToUse, Pattern.CASE_INSENSITIVE);
-        }
+   private Boolean trim = true;
 
-        String compare = (String) value;
-        if ( isTrimed() ) {
-            compare = compare.trim();
-        }
-        Matcher matcher = pattern.matcher( compare );
+   private String trimExpression = "";
 
-        if (!matcher.matches()) {
-            addFieldError(fieldName, object);
-        }
-    }
+   public void validate(Object object) throws ValidationException {
+      String fieldName = getFieldName();
+      Object value = this.getFieldValue(fieldName, object);
+      // if there is no value - don't do comparison
+      // if a value is required, a required validator should be added to the field
+      String regexToUse = getRegex();
+      if (LOG.isDebugEnabled()) {
+         LOG.debug("Defined regexp as [#0]", regexToUse);
+      }
+      if (value == null || regexToUse == null) {
+         return;
+      }
+      // XW-375 - must be a string
+      if (!(value instanceof String)) {
+         return;
+      }
+      // string must not be empty
+      String str = ((String) value).trim();
+      if (str.length() == 0) {
+         return;
+      }
+      // match against expression
+      Pattern pattern;
+      if (isCaseSensitive()) {
+         pattern = Pattern.compile(regexToUse);
+      } else {
+         pattern = Pattern.compile(regexToUse, Pattern.CASE_INSENSITIVE);
+      }
+      String compare = (String) value;
+      if (isTrimed()) {
+         compare = compare.trim();
+      }
+      Matcher matcher = pattern.matcher(compare);
+      if (!matcher.matches()) {
+         addFieldError(fieldName, object);
+      }
+   }
 
-    /**
-     * @return Returns the regular expression to be matched.
-     */
-    public String getRegex() {
-        if (StringUtils.isNotEmpty(regex)) {
-            return regex;
-        } else if (StringUtils.isNotEmpty(regexExpression)) {
-            return (String) parse(regexExpression, String.class);
-        } else {
-            return null;
-        }
-    }
+   /**
+    * @return Returns the regular expression to be matched.
+    */
+   public String getRegex() {
+      if (StringUtils.isNotEmpty(regex)) {
+         return regex;
+      } else if (StringUtils.isNotEmpty(regexExpression)) {
+         return (String) parse(regexExpression, String.class);
+      } else {
+         return null;
+      }
+   }
 
-    /**
-     * Sets the regular expression to be matched
-     */
-    public void setRegex(String regex) {
-        this.regex = regex;
-    }
+   /**
+    * Sets the regular expression to be matched
+    */
+   public void setRegex(String regex) {
+      this.regex = regex;
+   }
 
-    /**
-     * Sets the regular expression as an OGNL expression to be matched
-     */
-    public void setRegexExpression(String regexExpression) {
-        this.regexExpression = regexExpression;
-    }
+   /**
+    * Sets the regular expression as an OGNL expression to be matched
+    */
+   public void setRegexExpression(String regexExpression) {
+      this.regexExpression = regexExpression;
+   }
 
-    /**
-     * @return Returns whether the expression should be matched against in
-     *         a case-sensitive way.  Default is <code>true</code>.
-     */
-    public boolean isCaseSensitive() {
-        if (StringUtils.isNotEmpty(caseSensitiveExpression)) {
-            return (Boolean) parse(caseSensitiveExpression, Boolean.class);
-        }
-        return caseSensitive;
-    }
+   /**
+    * @return Returns whether the expression should be matched against in
+    *         a case-sensitive way.  Default is <code>true</code>.
+    */
+   public boolean isCaseSensitive() {
+      if (StringUtils.isNotEmpty(caseSensitiveExpression)) {
+         return (Boolean) parse(caseSensitiveExpression, Boolean.class);
+      }
+      return caseSensitive;
+   }
 
-    /**
-     * Sets whether the expression should be matched against in
-     * a case-sensitive way.  Default is <code>true</code>.
-     */
-    public void setCaseSensitive(Boolean caseSensitive) {
-        this.caseSensitive = caseSensitive;
-    }
+   /**
+    * Sets whether the expression should be matched against in
+    * a case-sensitive way.  Default is <code>true</code>.
+    */
+   public void setCaseSensitive(Boolean caseSensitive) {
+      this.caseSensitive = caseSensitive;
+   }
 
-    /**
-     * Allows specify caseSensitive param as an OGNL expression
-     */
-    public void setCaseSensitiveExpression(String caseSensitiveExpression) {
-        this.caseSensitiveExpression = caseSensitiveExpression;
-    }
+   /**
+    * Allows specify caseSensitive param as an OGNL expression
+    */
+   public void setCaseSensitiveExpression(String caseSensitiveExpression) {
+      this.caseSensitiveExpression = caseSensitiveExpression;
+   }
 
-    /**
-     * @return Returns whether the expression should be trimed before matching.
-     * Default is <code>true</code>.
-     */
-    public boolean isTrimed() {
-        if (StringUtils.isNotEmpty(trimExpression)) {
-            return (Boolean) parse(trimExpression, Boolean.class);
-        }
-        return trim;
-    }
+   /**
+    * @return Returns whether the expression should be trimed before matching.
+    * Default is <code>true</code>.
+    */
+   public boolean isTrimed() {
+      if (StringUtils.isNotEmpty(trimExpression)) {
+         return (Boolean) parse(trimExpression, Boolean.class);
+      }
+      return trim;
+   }
 
-    /**
-     * Sets whether the expression should be trimed before matching.
-     * Default is <code>true</code>.
-     */
-    public void setTrim(Boolean trim) {
-        this.trim = trim;
-    }
+   /**
+    * Sets whether the expression should be trimed before matching.
+    * Default is <code>true</code>.
+    */
+   public void setTrim(Boolean trim) {
+      this.trim = trim;
+   }
 
-    /**
-     * Allows specify trim param as an OGNL expression
-     */
-    public void setTrimExpression(String trimExpression) {
-        this.trimExpression = trimExpression;
-    }
-
+   /**
+    * Allows specify trim param as an OGNL expression
+    */
+   public void setTrimExpression(String trimExpression) {
+      this.trimExpression = trimExpression;
+   }
 }

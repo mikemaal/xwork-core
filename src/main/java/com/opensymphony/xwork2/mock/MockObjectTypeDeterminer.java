@@ -13,113 +13,123 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.opensymphony.xwork2.mock;
 
 import com.opensymphony.xwork2.conversion.ObjectTypeDeterminer;
 import ognl.OgnlException;
 import ognl.OgnlRuntime;
-
 import java.util.Map;
+import java.io.Serializable;
 
 /**
  * Mocks the function of an ObjectTypeDeterminer for testing purposes.
  *
  * @author Gabe
  */
-public class MockObjectTypeDeterminer implements ObjectTypeDeterminer {
+public class MockObjectTypeDeterminer implements ObjectTypeDeterminer, Serializable {
 
-    private Class keyClass;
-    private Class elementClass;
-    private String keyProperty;
-    private boolean shouldCreateIfNew;
+   private Class keyClass;
 
-    public MockObjectTypeDeterminer() {}
+   private Class elementClass;
 
+   private String keyProperty;
 
-    /**
-     * @param keyClass
-     * @param elementClass
-     * @param keyProperty
-     * @param shouldCreateIfNew
-     */
-    public MockObjectTypeDeterminer(Class keyClass, Class elementClass,
-                                    String keyProperty, boolean shouldCreateIfNew) {
-        super();
-        this.keyClass = keyClass;
-        this.elementClass = elementClass;
-        this.keyProperty = keyProperty;
-        this.shouldCreateIfNew = shouldCreateIfNew;
-    }
+   private boolean shouldCreateIfNew;
 
-    public Class getKeyClass(Class parentClass, String property) {
-        return getKeyClass();
-    }
+   public MockObjectTypeDeterminer() {
+   }
 
-    public Class getElementClass(Class parentClass, String property, Object key) {
-        return getElementClass();
-    }
+   /**
+    * @param keyClass
+    * @param elementClass
+    * @param keyProperty
+    * @param shouldCreateIfNew
+    */
+   public MockObjectTypeDeterminer(Class keyClass, Class elementClass, String keyProperty, boolean shouldCreateIfNew) {
+      super();
+      this.keyClass = keyClass;
+      this.elementClass = elementClass;
+      this.keyProperty = keyProperty;
+      this.shouldCreateIfNew = shouldCreateIfNew;
+   }
 
-    public String getKeyProperty(Class parentClass, String property) {
-        return getKeyProperty();
-    }
+   public Class getKeyClass(Class parentClass, String property) {
+      return getKeyClass();
+   }
 
-    public boolean shouldCreateIfNew(Class parentClass, String property,
-                                     Object target, String keyProperty, boolean isIndexAccessed) {
-        try {
-            System.out.println("ognl:"+OgnlRuntime.getPropertyAccessor(Map.class)+" this:"+this);
-        } catch (OgnlException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        return isShouldCreateIfNew();
-    }
+   public Class getElementClass(Class parentClass, String property, Object key) {
+      return getElementClass();
+   }
 
-    /**
-     * @return Returns the elementClass.
-     */
-    public Class getElementClass() {
-        return elementClass;
-    }
-    /**
-     * @param elementClass The elementClass to set.
-     */
-    public void setElementClass(Class elementClass) {
-        this.elementClass = elementClass;
-    }
-    /**
-     * @return Returns the keyClass.
-     */
-    public Class getKeyClass() {
-        return keyClass;
-    }
-    /**
-     * @param keyClass The keyClass to set.
-     */
-    public void setKeyClass(Class keyClass) {
-        this.keyClass = keyClass;
-    }
-    /**
-     * @return Returns the keyProperty.
-     */
-    public String getKeyProperty() {
-        return keyProperty;
-    }
-    /**
-     * @param keyProperty The keyProperty to set.
-     */
-    public void setKeyProperty(String keyProperty) {
-        this.keyProperty = keyProperty;
-    }
-    /**
-     * @return Returns the shouldCreateIfNew.
-     */
-    public boolean isShouldCreateIfNew() {
-        return shouldCreateIfNew;
-    }
-    /**
-     * @param shouldCreateIfNew The shouldCreateIfNew to set.
-     */
-    public void setShouldCreateIfNew(boolean shouldCreateIfNew) {
-        this.shouldCreateIfNew = shouldCreateIfNew;
-    }
+   public String getKeyProperty(Class parentClass, String property) {
+      return getKeyProperty();
+   }
+
+   public boolean shouldCreateIfNew(Class parentClass, String property, Object target, String keyProperty,
+         boolean isIndexAccessed) {
+      try {
+         System.out.println("ognl:" + OgnlRuntime.getPropertyAccessor(Map.class) + " this:" + this);
+      } catch (OgnlException e) {
+         // TODO Auto-generated catch block
+         e.printStackTrace();
+      }
+      return isShouldCreateIfNew();
+   }
+
+   /**
+    * @return Returns the elementClass.
+    */
+   public Class getElementClass() {
+      return elementClass;
+   }
+
+   /**
+    * @param elementClass The elementClass to set.
+    */
+   public void setElementClass(Class elementClass) {
+      this.elementClass = elementClass;
+   }
+
+   /**
+    * @return Returns the keyClass.
+    */
+   public Class getKeyClass() {
+      return keyClass;
+   }
+
+   /**
+    * @param keyClass The keyClass to set.
+    */
+   public void setKeyClass(Class keyClass) {
+      this.keyClass = keyClass;
+   }
+
+   /**
+    * @return Returns the keyProperty.
+    */
+   public String getKeyProperty() {
+      return keyProperty;
+   }
+
+   /**
+    * @param keyProperty The keyProperty to set.
+    */
+   public void setKeyProperty(String keyProperty) {
+      this.keyProperty = keyProperty;
+   }
+
+   /**
+    * @return Returns the shouldCreateIfNew.
+    */
+   public boolean isShouldCreateIfNew() {
+      return shouldCreateIfNew;
+   }
+
+   /**
+    * @param shouldCreateIfNew The shouldCreateIfNew to set.
+    */
+   public void setShouldCreateIfNew(boolean shouldCreateIfNew) {
+      this.shouldCreateIfNew = shouldCreateIfNew;
+   }
 }

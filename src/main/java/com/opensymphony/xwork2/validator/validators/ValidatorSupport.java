@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.opensymphony.xwork2.validator.validators;
 
 import com.opensymphony.xwork2.util.TextParseUtil;
@@ -25,10 +26,9 @@ import com.opensymphony.xwork2.validator.ValidationException;
 import com.opensymphony.xwork2.validator.Validator;
 import com.opensymphony.xwork2.validator.ValidatorContext;
 import org.apache.commons.lang3.StringUtils;
-
 import java.util.ArrayList;
 import java.util.List;
-
+import java.io.Serializable;
 
 /**
  * Abstract implementation of the Validator interface suitable for subclassing.
@@ -37,174 +37,164 @@ import java.util.List;
  * @author tm_jee
  * @author Martin Gilday
  */
-public abstract class ValidatorSupport implements Validator, ShortCircuitableValidator {
+public abstract class ValidatorSupport implements Validator, ShortCircuitableValidator, Serializable {
 
-    protected final Logger log = LoggerFactory.getLogger(this.getClass());
+   protected final Logger log = LoggerFactory.getLogger(this.getClass());
 
-    protected String defaultMessage = "";
-    protected String messageKey;
-    private ValidatorContext validatorContext;
-    private boolean shortCircuit;
-    private String type;
-    private String[] messageParameters;
-    protected ValueStack stack;
+   protected String defaultMessage = "";
 
+   protected String messageKey;
 
-    public void setValueStack(ValueStack stack) {
-        this.stack = stack;
-    }
+   private ValidatorContext validatorContext;
 
-    public void setDefaultMessage(String message) {
-        if (StringUtils.isNotEmpty(message)) {
-            this.defaultMessage = message;
-        }
-    }
+   private boolean shortCircuit;
 
-    public String getDefaultMessage() {
-        return defaultMessage;
-    }
+   private String type;
 
-    public String getMessage(Object object) {
-        String message;
-        boolean pop = false;
+   private String[] messageParameters;
 
-        if (!stack.getRoot().contains(object)) {
-            stack.push(object);
-            pop = true;
-        }
+   protected ValueStack stack;
 
-        stack.push(this);
+   public void setValueStack(ValueStack stack) {
+      this.stack = stack;
+   }
 
-        if (messageKey != null) {
-            if ((defaultMessage == null) || ("".equals(defaultMessage.trim()))) {
-                defaultMessage = messageKey;
+   public void setDefaultMessage(String message) {
+      if (StringUtils.isNotEmpty(message)) {
+         this.defaultMessage = message;
+      }
+   }
+
+   public String getDefaultMessage() {
+      return defaultMessage;
+   }
+
+   public String getMessage(Object object) {
+      String message;
+      boolean pop = false;
+      if (!stack.getRoot().contains(object)) {
+         stack.push(object);
+         pop = true;
+      }
+      stack.push(this);
+      if (messageKey != null) {
+         if ((defaultMessage == null) || ("".equals(defaultMessage.trim()))) {
+            defaultMessage = messageKey;
+         }
+         if (validatorContext == null) {
+            validatorContext = new DelegatingValidatorContext(object);
+         }
+         List<Object> parsedMessageParameters = null;
+         if (messageParameters != null) {
+            parsedMessageParameters = new ArrayList<Object>();
+            for (String messageParameter : messageParameters) {
+               if (messageParameter != null) {
+                  try {
+                     Object val = stack.findValue(messageParameter);
+                     parsedMessageParameters.add(val);
+                  } catch (Exception e) {
+                     // if there's an exception in parsing, we'll just treat the expression itself as the
+                     // parameter
+                     log.warn("exception while parsing message parameter [" + messageParameter + "]", e);
+                     parsedMessageParameters.add(messageParameter);
+                  }
+               }
             }
-            if (validatorContext == null) {
-                validatorContext = new DelegatingValidatorContext(object);
-            }
-            List<Object> parsedMessageParameters = null;
-            if (messageParameters != null) {
-                parsedMessageParameters = new ArrayList<Object>();
-                for (String messageParameter : messageParameters) {
-                    if (messageParameter != null) {
-                        try {
-                            Object val = stack.findValue(messageParameter);
-                            parsedMessageParameters.add(val);
-                        } catch (Exception e) {
-                            // if there's an exception in parsing, we'll just treat the expression itself as the
-                            // parameter
-                            log.warn("exception while parsing message parameter [" + messageParameter + "]", e);
-                            parsedMessageParameters.add(messageParameter);
-                        }
-                    }
-                }
-            }
+         }
+         message = validatorContext.getText(messageKey, defaultMessage, parsedMessageParameters);
+      } else {
+         message = defaultMessage;
+      }
+      if (StringUtils.isNotBlank(message))
+         message = TextParseUtil.translateVariables(message, stack);
+      stack.pop();
+      if (pop) {
+         stack.pop();
+      }
+      return message;
+   }
 
-            message = validatorContext.getText(messageKey, defaultMessage, parsedMessageParameters);
+   public void setMessageKey(String key) {
+      messageKey = key;
+   }
 
-        } else {
-            message = defaultMessage;
-        }
+   public String getMessageKey() {
+      return messageKey;
+   }
 
-        if (StringUtils.isNotBlank(message))
-            message = TextParseUtil.translateVariables(message, stack);
+   public String[] getMessageParameters() {
+      return this.messageParameters;
+   }
 
-        stack.pop();
+   public void setMessageParameters(String[] messageParameters) {
+      this.messageParameters = messageParameters;
+   }
 
-        if (pop) {
-            stack.pop();
-        }
+   public void setShortCircuit(boolean shortcircuit) {
+      shortCircuit = shortcircuit;
+   }
 
-        return message;
-    }
+   public boolean isShortCircuit() {
+      return shortCircuit;
+   }
 
-    public void setMessageKey(String key) {
-        messageKey = key;
-    }
+   public void setValidatorContext(ValidatorContext validatorContext) {
+      this.validatorContext = validatorContext;
+   }
 
-    public String getMessageKey() {
-        return messageKey;
-    }
+   public ValidatorContext getValidatorContext() {
+      return validatorContext;
+   }
 
-    public String[] getMessageParameters() {
-        return this.messageParameters;
-    }
+   public void setValidatorType(String type) {
+      this.type = type;
+   }
 
-    public void setMessageParameters(String[] messageParameters) {
-        this.messageParameters = messageParameters;
-    }
+   public String getValidatorType() {
+      return type;
+   }
 
-    public void setShortCircuit(boolean shortcircuit) {
-        shortCircuit = shortcircuit;
-    }
+   /**
+    * Parse <code>expression</code> passed in against value stack.
+    *
+    * @param expression an OGNL expression
+    * @param type type to return
+    * @return Object
+    */
+   protected Object parse(String expression, Class type) {
+      if (expression == null) {
+         return null;
+      }
+      return TextParseUtil.translateVariables('$', expression, stack, type);
+   }
 
-    public boolean isShortCircuit() {
-        return shortCircuit;
-    }
+   /**
+    * Return the field value named <code>name</code> from <code>object</code>,
+    * <code>object</code> should have the appropriate getter/setter.
+    *
+    * @param name name of the field
+    * @param object to search field name on
+    * @return Object as field value
+    * @throws ValidationException
+    */
+   protected Object getFieldValue(String name, Object object) throws ValidationException {
+      boolean pop = false;
+      if (!stack.getRoot().contains(object)) {
+         stack.push(object);
+         pop = true;
+      }
+      Object retVal = stack.findValue(name);
+      if (pop) {
+         stack.pop();
+      }
+      return retVal;
+   }
 
-    public void setValidatorContext(ValidatorContext validatorContext) {
-        this.validatorContext = validatorContext;
-    }
+   protected void addActionError(Object object) {
+      validatorContext.addActionError(getMessage(object));
+   }
 
-    public ValidatorContext getValidatorContext() {
-        return validatorContext;
-    }
-
-    public void setValidatorType(String type) {
-        this.type = type;
-    }
-
-    public String getValidatorType() {
-        return type;
-    }
-
-    /**
-     * Parse <code>expression</code> passed in against value stack.
-     *
-     * @param expression an OGNL expression
-     * @param type type to return
-     * @return Object
-     */
-    protected Object parse(String expression, Class type) {
-        if (expression == null) {
-            return null;
-        }
-        return TextParseUtil.translateVariables('$', expression, stack, type);
-    }
-
-    /**
-     * Return the field value named <code>name</code> from <code>object</code>,
-     * <code>object</code> should have the appropriate getter/setter.
-     *
-     * @param name name of the field
-     * @param object to search field name on
-     * @return Object as field value
-     * @throws ValidationException
-     */
-    protected Object getFieldValue(String name, Object object) throws ValidationException {
-
-        boolean pop = false;
-
-        if (!stack.getRoot().contains(object)) {
-            stack.push(object);
-            pop = true;
-        }
-
-        Object retVal = stack.findValue(name);
-
-        if (pop) {
-            stack.pop();
-        }
-
-        return retVal;
-    }
-
-    protected void addActionError(Object object) {
-        validatorContext.addActionError(getMessage(object));
-    }
-
-    protected void addFieldError(String propertyName, Object object) {
-        validatorContext.addFieldError(propertyName, getMessage(object));
-    }
-
+   protected void addFieldError(String propertyName, Object object) {
+      validatorContext.addFieldError(propertyName, getMessage(object));
+   }
 }

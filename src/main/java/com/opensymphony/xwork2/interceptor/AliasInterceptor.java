@@ -29,9 +29,8 @@ import com.opensymphony.xwork2.util.LocalizedTextUtil;
 import com.opensymphony.xwork2.util.reflection.ReflectionContextState;
 import com.opensymphony.xwork2.util.logging.Logger;
 import com.opensymphony.xwork2.util.logging.LoggerFactory;
-
 import java.util.Map;
-
+import java.io.Serializable;
 
 /**
  * <!-- START SNIPPET: description -->
@@ -86,111 +85,105 @@ import java.util.Map;
  *
  * @author Matthew Payne
  */
-public class AliasInterceptor extends AbstractInterceptor {
+public class AliasInterceptor extends AbstractInterceptor implements Serializable {
 
-    private static final Logger LOG = LoggerFactory.getLogger(AliasInterceptor.class);
+   private static final Logger LOG = LoggerFactory.getLogger(AliasInterceptor.class);
 
-    private static final String DEFAULT_ALIAS_KEY = "aliases";
-    protected String aliasesKey = DEFAULT_ALIAS_KEY;
+   private static final String DEFAULT_ALIAS_KEY = "aliases";
 
-    protected ValueStackFactory valueStackFactory;
-    static boolean devMode = false;
+   protected String aliasesKey = DEFAULT_ALIAS_KEY;
 
-    @Inject(XWorkConstants.DEV_MODE)
-    public static void setDevMode(String mode) {
-        devMode = "true".equals(mode);
-    }   
+   protected ValueStackFactory valueStackFactory;
 
-    @Inject
-    public void setValueStackFactory(ValueStackFactory valueStackFactory) {
-        this.valueStackFactory = valueStackFactory;
-    }
+   static boolean devMode = false;
 
-    /**
-     * Sets the name of the action parameter to look for the alias map.
-     * <p/>
-     * Default is <code>aliases</code>.
-     *
-     * @param aliasesKey  the name of the action parameter
-     */
-    public void setAliasesKey(String aliasesKey) {
-        this.aliasesKey = aliasesKey;
-    }
+   @Inject(XWorkConstants.DEV_MODE)
+   public static void setDevMode(String mode) {
+      devMode = "true".equals(mode);
+   }
 
-    @Override public String intercept(ActionInvocation invocation) throws Exception {
+   @Inject
+   public void setValueStackFactory(ValueStackFactory valueStackFactory) {
+      this.valueStackFactory = valueStackFactory;
+   }
 
-        ActionConfig config = invocation.getProxy().getConfig();
-        ActionContext ac = invocation.getInvocationContext();
-        Object action = invocation.getAction();
+   /**
+    * Sets the name of the action parameter to look for the alias map.
+    * <p/>
+    * Default is <code>aliases</code>.
+    *
+    * @param aliasesKey  the name of the action parameter
+    */
+   public void setAliasesKey(String aliasesKey) {
+      this.aliasesKey = aliasesKey;
+   }
 
-        // get the action's parameters
-        final Map<String, String> parameters = config.getParams();
-
-        if (parameters.containsKey(aliasesKey)) {
-
-            String aliasExpression = parameters.get(aliasesKey);
-            ValueStack stack = ac.getValueStack();
-            Object obj = stack.findValue(aliasExpression);
-
-            if (obj != null && obj instanceof Map) {
-                //get secure stack
-                ValueStack newStack = valueStackFactory.createValueStack(stack);
-                boolean clearableStack = newStack instanceof ClearableValueStack;
-                if (clearableStack) {
-                    //if the stack's context can be cleared, do that to prevent OGNL
-                    //from having access to objects in the stack, see XW-641
-                    ((ClearableValueStack)newStack).clearContextValues();
-                    Map<String, Object> context = newStack.getContext();
-                    ReflectionContextState.setCreatingNullObjects(context, true);
-                    ReflectionContextState.setDenyMethodExecution(context, true);
-                    ReflectionContextState.setReportingConversionErrors(context, true);
-
-                    //keep locale from original context
-                    context.put(ActionContext.LOCALE, stack.getContext().get(ActionContext.LOCALE));
-                }
-
-                // override
-                Map aliases = (Map) obj;
-                for (Object o : aliases.entrySet()) {
-                    Map.Entry entry = (Map.Entry) o;
-                    String name = entry.getKey().toString();
-                    String alias = (String) entry.getValue();
-                    Object value = stack.findValue(name);
-                    if (null == value) {
-                        // workaround
-                        Map<String, Object> contextParameters = ActionContext.getContext().getParameters();
-
-                        if (null != contextParameters) {
-                            value = contextParameters.get(name);
-                        }
-                    }
-                    if (null != value) {
-                        try {
-                            newStack.setValue(alias, value);
-                        } catch (RuntimeException e) {
-                            if (devMode) {
-                                String developerNotification = LocalizedTextUtil.findText(ParametersInterceptor.class, "devmode.notification", ActionContext.getContext().getLocale(), "Developer Notification:\n{0}", new Object[]{
-                                        "Unexpected Exception caught setting '" + entry.getKey() + "' on '" + action.getClass() + ": " + e.getMessage()
-                                });
-                                LOG.error(developerNotification);
-                                if (action instanceof ValidationAware) {
-                                    ((ValidationAware) action).addActionMessage(developerNotification);
-                                }
-                            }
-                        }
-                    }
-                }
-
-                if (clearableStack && (stack.getContext() != null) && (newStack.getContext() != null))
-                    stack.getContext().put(ActionContext.CONVERSION_ERRORS, newStack.getContext().get(ActionContext.CONVERSION_ERRORS));
-            } else {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("invalid alias expression:" + aliasesKey);
-                }
+   @Override
+   public String intercept(ActionInvocation invocation) throws Exception {
+      ActionConfig config = invocation.getProxy().getConfig();
+      ActionContext ac = invocation.getInvocationContext();
+      Object action = invocation.getAction();
+      // get the action's parameters
+      final Map<String, String> parameters = config.getParams();
+      if (parameters.containsKey(aliasesKey)) {
+         String aliasExpression = parameters.get(aliasesKey);
+         ValueStack stack = ac.getValueStack();
+         Object obj = stack.findValue(aliasExpression);
+         if (obj != null && obj instanceof Map) {
+            //get secure stack
+            ValueStack newStack = valueStackFactory.createValueStack(stack);
+            boolean clearableStack = newStack instanceof ClearableValueStack;
+            if (clearableStack) {
+               //if the stack's context can be cleared, do that to prevent OGNL
+               //from having access to objects in the stack, see XW-641
+               ((ClearableValueStack) newStack).clearContextValues();
+               Map<String, Object> context = newStack.getContext();
+               ReflectionContextState.setCreatingNullObjects(context, true);
+               ReflectionContextState.setDenyMethodExecution(context, true);
+               ReflectionContextState.setReportingConversionErrors(context, true);
+               //keep locale from original context
+               context.put(ActionContext.LOCALE, stack.getContext().get(ActionContext.LOCALE));
             }
-        }
-        
-        return invocation.invoke();
-    }
-    
+            // override
+            Map aliases = (Map) obj;
+            for (Object o : aliases.entrySet()) {
+               Map.Entry entry = (Map.Entry) o;
+               String name = entry.getKey().toString();
+               String alias = (String) entry.getValue();
+               Object value = stack.findValue(name);
+               if (null == value) {
+                  // workaround
+                  Map<String, Object> contextParameters = ActionContext.getContext().getParameters();
+                  if (null != contextParameters) {
+                     value = contextParameters.get(name);
+                  }
+               }
+               if (null != value) {
+                  try {
+                     newStack.setValue(alias, value);
+                  } catch (RuntimeException e) {
+                     if (devMode) {
+                        String developerNotification = LocalizedTextUtil.findText(ParametersInterceptor.class,
+                              "devmode.notification", ActionContext.getContext().getLocale(),
+                              "Developer Notification:\n{0}", new Object[] { "Unexpected Exception caught setting '"
+                                    + entry.getKey() + "' on '" + action.getClass() + ": " + e.getMessage() });
+                        LOG.error(developerNotification);
+                        if (action instanceof ValidationAware) {
+                           ((ValidationAware) action).addActionMessage(developerNotification);
+                        }
+                     }
+                  }
+               }
+            }
+            if (clearableStack && (stack.getContext() != null) && (newStack.getContext() != null))
+               stack.getContext().put(ActionContext.CONVERSION_ERRORS,
+                     newStack.getContext().get(ActionContext.CONVERSION_ERRORS));
+         } else {
+            if (LOG.isDebugEnabled()) {
+               LOG.debug("invalid alias expression:" + aliasesKey);
+            }
+         }
+      }
+      return invocation.invoke();
+   }
 }

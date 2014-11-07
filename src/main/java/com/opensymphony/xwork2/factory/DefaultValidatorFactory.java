@@ -4,31 +4,32 @@ import com.opensymphony.xwork2.ObjectFactory;
 import com.opensymphony.xwork2.inject.Inject;
 import com.opensymphony.xwork2.util.reflection.ReflectionProvider;
 import com.opensymphony.xwork2.validator.Validator;
-
 import java.util.Map;
+import java.io.Serializable;
 
 /**
  * Default implementation
  */
-public class DefaultValidatorFactory implements ValidatorFactory {
+public class DefaultValidatorFactory implements ValidatorFactory, Serializable {
 
-    private ObjectFactory objectFactory;
-    private ReflectionProvider reflectionProvider;
+   private ObjectFactory objectFactory;
 
-    @Inject
-    public void setObjectFactory(ObjectFactory objectFactory) {
-        this.objectFactory = objectFactory;
-    }
+   private ReflectionProvider reflectionProvider;
 
-    @Inject
-    public void setReflectionProvider(ReflectionProvider reflectionProvider) {
-        this.reflectionProvider = reflectionProvider;
-    }
+   @Inject
+   public void setObjectFactory(ObjectFactory objectFactory) {
+      this.objectFactory = objectFactory;
+   }
 
-    public Validator buildValidator(String className, Map<String, Object> params, Map<String, Object> extraContext) throws Exception {
-        Validator validator = (Validator) objectFactory.buildBean(className, extraContext);
-        reflectionProvider.setProperties(params, validator, extraContext);
+   @Inject
+   public void setReflectionProvider(ReflectionProvider reflectionProvider) {
+      this.reflectionProvider = reflectionProvider;
+   }
 
-        return validator;
-    }
+   public Validator buildValidator(String className, Map<String, Object> params, Map<String, Object> extraContext)
+         throws Exception {
+      Validator validator = (Validator) objectFactory.buildBean(className, extraContext);
+      reflectionProvider.setProperties(params, validator, extraContext);
+      return validator;
+   }
 }

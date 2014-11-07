@@ -13,10 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.opensymphony.xwork2.validator.validators;
 
 import com.opensymphony.xwork2.validator.ValidationException;
 import org.apache.commons.lang3.StringUtils;
+import java.io.Serializable;
 
 /**
  * <!-- START SNIPPET: javadoc -->
@@ -85,85 +87,85 @@ import org.apache.commons.lang3.StringUtils;
  * @author tmjee
  * @version $Date: 2013-03-18 21:17:24 +0100 (Mon, 18 Mar 2013) $ $Id: StringLengthFieldValidator.java 1457969 2013-03-18 20:17:24Z lukaszlenart $
  */
-public class StringLengthFieldValidator extends FieldValidatorSupport {
+public class StringLengthFieldValidator extends FieldValidatorSupport implements Serializable {
 
-    private boolean trim = true;
-    private int maxLength = -1;
-    private int minLength = -1;
+   private boolean trim = true;
 
-    private String maxLengthExpression;
-    private String minLengthExpression;
-    private String trimExpression;
+   private int maxLength = -1;
 
-    public void setMaxLength(int maxLength) {
-        this.maxLength = maxLength;
-    }
+   private int minLength = -1;
 
-    public void setMaxLengthExpression(String maxLengthExpression) {
-        this.maxLengthExpression = maxLengthExpression;
-    }
+   private String maxLengthExpression;
 
-    public int getMaxLength() {
-        if (StringUtils.isNotEmpty(maxLengthExpression)) {
-            return (Integer) parse(maxLengthExpression, Integer.class);
-        }
-        return maxLength;
-    }
+   private String minLengthExpression;
 
-    public void setMinLength(int minLength) {
-        this.minLength = minLength;
-    }
+   private String trimExpression;
 
-    public void setMinLengthExpression(String minLengthExpression) {
-        this.minLengthExpression = minLengthExpression;
-    }
+   public void setMaxLength(int maxLength) {
+      this.maxLength = maxLength;
+   }
 
-    public int getMinLength() {
-        if (StringUtils.isNotEmpty(minLengthExpression)) {
-            return (Integer) parse(minLengthExpression, Integer.class);
-        }
-        return minLength;
-    }
+   public void setMaxLengthExpression(String maxLengthExpression) {
+      this.maxLengthExpression = maxLengthExpression;
+   }
 
-    public void setTrim(boolean trim) {
-        this.trim = trim;
-    }
+   public int getMaxLength() {
+      if (StringUtils.isNotEmpty(maxLengthExpression)) {
+         return (Integer) parse(maxLengthExpression, Integer.class);
+      }
+      return maxLength;
+   }
 
-    public void setTrimExpression(String trimExpression) {
-        this.trimExpression = trimExpression;
-    }
+   public void setMinLength(int minLength) {
+      this.minLength = minLength;
+   }
 
-    public boolean isTrim() {
-        if (StringUtils.isNotEmpty(trimExpression)) {
-            return (Boolean) parse(trimExpression, Boolean.class);
-        }
-        return trim;
-    }
+   public void setMinLengthExpression(String minLengthExpression) {
+      this.minLengthExpression = minLengthExpression;
+   }
 
-    public void validate(Object object) throws ValidationException {
-        String fieldName = getFieldName();
-        String val = (String) getFieldValue(fieldName, object);
+   public int getMinLength() {
+      if (StringUtils.isNotEmpty(minLengthExpression)) {
+         return (Integer) parse(minLengthExpression, Integer.class);
+      }
+      return minLength;
+   }
 
-        if (val == null || val.length() <= 0) {
-            // use a required validator for these
+   public void setTrim(boolean trim) {
+      this.trim = trim;
+   }
+
+   public void setTrimExpression(String trimExpression) {
+      this.trimExpression = trimExpression;
+   }
+
+   public boolean isTrim() {
+      if (StringUtils.isNotEmpty(trimExpression)) {
+         return (Boolean) parse(trimExpression, Boolean.class);
+      }
+      return trim;
+   }
+
+   public void validate(Object object) throws ValidationException {
+      String fieldName = getFieldName();
+      String val = (String) getFieldValue(fieldName, object);
+      if (val == null || val.length() <= 0) {
+         // use a required validator for these
+         return;
+      }
+      if (isTrim()) {
+         val = val.trim();
+         if (val.length() <= 0) {
+            // use a required validator
             return;
-        }
-        if (isTrim()) {
-            val = val.trim();
-            if (val.length() <= 0) {
-                // use a required validator
-                return;
-            }
-        }
-
-        int minLengthToUse = getMinLength();
-        int maxLengthToUse = getMaxLength();
-
-        if ((minLengthToUse > -1) && (val.length() < minLengthToUse)) {
-            addFieldError(fieldName, object);
-        } else if ((maxLengthToUse > -1) && (val.length() > maxLengthToUse)) {
-            addFieldError(fieldName, object);
-        }
-    }
-
+         }
+      }
+      int minLengthToUse = getMinLength();
+      int maxLengthToUse = getMaxLength();
+      if ((minLengthToUse > -1) && (val.length() < minLengthToUse)) {
+         addFieldError(fieldName, object);
+      } else if ((maxLengthToUse > -1) && (val.length() > maxLengthToUse)) {
+         addFieldError(fieldName, object);
+      }
+   }
 }

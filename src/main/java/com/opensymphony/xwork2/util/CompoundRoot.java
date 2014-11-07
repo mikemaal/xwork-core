@@ -13,11 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.opensymphony.xwork2.util;
 
 import java.util.ArrayList;
 import java.util.List;
-
+import java.io.Serializable;
 
 /**
  * A Stack that is implemented using a List.
@@ -25,29 +26,28 @@ import java.util.List;
  * @author plightbo
  * @version $Revision: 894090 $
  */
-public class CompoundRoot extends ArrayList {
+public class CompoundRoot extends ArrayList implements Serializable {
 
-    public CompoundRoot() {
-    }
+   public CompoundRoot() {
+   }
 
-    public CompoundRoot(List list) {
-        super(list);
-    }
+   public CompoundRoot(List list) {
+      super(list);
+   }
 
+   public CompoundRoot cutStack(int index) {
+      return new CompoundRoot(subList(index, size()));
+   }
 
-    public CompoundRoot cutStack(int index) {
-        return new CompoundRoot(subList(index, size()));
-    }
+   public Object peek() {
+      return get(0);
+   }
 
-    public Object peek() {
-        return get(0);
-    }
+   public Object pop() {
+      return remove(0);
+   }
 
-    public Object pop() {
-        return remove(0);
-    }
-
-    public void push(Object o) {
-        add(0, o);
-    }
+   public void push(Object o) {
+      add(0, o);
+   }
 }

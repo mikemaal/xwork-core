@@ -17,7 +17,7 @@
 package com.opensymphony.xwork2.conversion.impl;
 
 import java.util.Map;
-
+import java.io.Serializable;
 
 /**
  * <code>EnumTypeConverter</code>
@@ -87,38 +87,37 @@ import java.util.Map;
  * @version $Id: EnumTypeConverter.java 894090 2009-12-27 18:18:29Z martinc $
  * @deprecated Since Struts 2.1.0 as enum support is now built into XWork
  */
-@Deprecated public class EnumTypeConverter extends DefaultTypeConverter {
+@Deprecated
+public class EnumTypeConverter extends DefaultTypeConverter implements Serializable {
 
-    /**
-     * Converts the given object to a given type. How this is to be done is implemented in toClass. The OGNL context, o
-     * and toClass are given. This method should be able to handle conversion in general without any context or object
-     * specified.
-     *
-     * @param context - OGNL context under which the conversion is being done
-     * @param o       - the object to be converted
-     * @param toClass - the class that contains the code to convert to enumeration
-     * @return Converted value of type declared in toClass or TypeConverter.NoConversionPossible to indicate that the
-     *         conversion was not possible.
-     */
-    @Override
-    public Object convertValue(Map<String, Object> context, Object o, Class toClass) {
-        if (o instanceof String[]) {
-            return convertFromString(((String[]) o)[0], toClass);
-        } else if (o instanceof String) {
-            return convertFromString((String) o, toClass);
-        }
+   /**
+    * Converts the given object to a given type. How this is to be done is implemented in toClass. The OGNL context, o
+    * and toClass are given. This method should be able to handle conversion in general without any context or object
+    * specified.
+    *
+    * @param context - OGNL context under which the conversion is being done
+    * @param o       - the object to be converted
+    * @param toClass - the class that contains the code to convert to enumeration
+    * @return Converted value of type declared in toClass or TypeConverter.NoConversionPossible to indicate that the
+    *         conversion was not possible.
+    */
+   @Override
+   public Object convertValue(Map<String, Object> context, Object o, Class toClass) {
+      if (o instanceof String[]) {
+         return convertFromString(((String[]) o)[0], toClass);
+      } else if (o instanceof String) {
+         return convertFromString((String) o, toClass);
+      }
+      return super.convertValue(context, o, toClass);
+   }
 
-        return super.convertValue(context, o, toClass);
-    }
-
-    /**
-     * Converts one or more String values to the specified class.
-     * @param value - the String values to be converted, such as those submitted from an HTML form
-     * @param toClass - the class to convert to
-     * @return the converted object
-     */
-    public java.lang.Enum convertFromString(String value, Class toClass) {
-        return Enum.valueOf(toClass, value);
-    }
-
+   /**
+    * Converts one or more String values to the specified class.
+    * @param value - the String values to be converted, such as those submitted from an HTML form
+    * @param toClass - the class to convert to
+    * @return the converted object
+    */
+   public java.lang.Enum convertFromString(String value, Class toClass) {
+      return Enum.valueOf(toClass, value);
+   }
 }

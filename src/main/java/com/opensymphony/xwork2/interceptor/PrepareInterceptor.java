@@ -14,15 +14,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.opensymphony.xwork2.interceptor;
 
 import com.opensymphony.xwork2.ActionInvocation;
 import com.opensymphony.xwork2.Preparable;
 import com.opensymphony.xwork2.util.logging.Logger;
 import com.opensymphony.xwork2.util.logging.LoggerFactory;
-
 import java.lang.reflect.InvocationTargetException;
-
+import java.io.Serializable;
 
 /**
  * <!-- START SNIPPET: description -->
@@ -96,79 +96,78 @@ import java.lang.reflect.InvocationTargetException;
  * @author tm_jee
  * @see com.opensymphony.xwork2.Preparable
  */
-public class PrepareInterceptor extends MethodFilterInterceptor {
+public class PrepareInterceptor extends MethodFilterInterceptor implements Serializable {
 
-    private static final long serialVersionUID = -5216969014510719786L;
+   private static final long serialVersionUID = -5216969014510719786L;
 
-    private final static String PREPARE_PREFIX = "prepare";
-    private final static String ALT_PREPARE_PREFIX = "prepareDo";
+   private static final String PREPARE_PREFIX = "prepare";
 
-    private boolean alwaysInvokePrepare = true;
-    private boolean firstCallPrepareDo = false;
+   private static final String ALT_PREPARE_PREFIX = "prepareDo";
 
-    /**
-     * Sets if the <code>preapare</code> method should always be executed.
-     * <p/>
-     * Default is <tt>true</tt>.
-     *
-     * @param alwaysInvokePrepare if <code>prepare</code> should always be executed or not.
-     */
-    public void setAlwaysInvokePrepare(String alwaysInvokePrepare) {
-        this.alwaysInvokePrepare = Boolean.parseBoolean(alwaysInvokePrepare);
-    }
+   private boolean alwaysInvokePrepare = true;
 
-    /**
-     * Sets if the <code>prepareDoXXX</code> method should be called first
-     * <p/>
-     * Default is <tt>false</tt> for backward compatibility
-     *
-     * @param firstCallPrepareDo if <code>prepareDoXXX</code> should be called first
-     */
-    public void setFirstCallPrepareDo(String firstCallPrepareDo) {
-        this.firstCallPrepareDo = Boolean.parseBoolean(firstCallPrepareDo);
-    }
+   private boolean firstCallPrepareDo = false;
 
-    @Override
-    public String doIntercept(ActionInvocation invocation) throws Exception {
-        Object action = invocation.getAction();
+   /**
+    * Sets if the <code>preapare</code> method should always be executed.
+    * <p/>
+    * Default is <tt>true</tt>.
+    *
+    * @param alwaysInvokePrepare if <code>prepare</code> should always be executed or not.
+    */
+   public void setAlwaysInvokePrepare(String alwaysInvokePrepare) {
+      this.alwaysInvokePrepare = Boolean.parseBoolean(alwaysInvokePrepare);
+   }
 
-        if (action instanceof Preparable) {
-            try {
-                String[] prefixes;
-                if (firstCallPrepareDo) {
-                    prefixes = new String[] {ALT_PREPARE_PREFIX, PREPARE_PREFIX};
-                } else {
-                    prefixes = new String[] {PREPARE_PREFIX, ALT_PREPARE_PREFIX};
-                }
-                PrefixMethodInvocationUtil.invokePrefixMethod(invocation, prefixes);
+   /**
+    * Sets if the <code>prepareDoXXX</code> method should be called first
+    * <p/>
+    * Default is <tt>false</tt> for backward compatibility
+    *
+    * @param firstCallPrepareDo if <code>prepareDoXXX</code> should be called first
+    */
+   public void setFirstCallPrepareDo(String firstCallPrepareDo) {
+      this.firstCallPrepareDo = Boolean.parseBoolean(firstCallPrepareDo);
+   }
+
+   @Override
+   public String doIntercept(ActionInvocation invocation) throws Exception {
+      Object action = invocation.getAction();
+      if (action instanceof Preparable) {
+         try {
+            String[] prefixes;
+            if (firstCallPrepareDo) {
+               prefixes = new String[] { ALT_PREPARE_PREFIX, PREPARE_PREFIX };
+            } else {
+               prefixes = new String[] { PREPARE_PREFIX, ALT_PREPARE_PREFIX };
             }
-            catch (InvocationTargetException e) {
-                /*
-                 * The invoked method threw an exception and reflection wrapped it
-                 * in an InvocationTargetException.
-                 * If possible re-throw the original exception so that normal
-                 * exception handling will take place.
-                 */
-                Throwable cause = e.getCause();
-                if (cause instanceof Exception) {
-                    throw (Exception) cause;
-                } else if(cause instanceof Error) {
-                    throw (Error) cause;
-                } else {
-                    /*
-                     * The cause is not an Exception or Error (must be Throwable) so
-                     * just re-throw the wrapped exception.
-                     */
-                    throw e;
-                }
+            PrefixMethodInvocationUtil.invokePrefixMethod(invocation, prefixes);
+         } catch (InvocationTargetException e) {
+            /*
+             * The invoked method threw an exception and reflection wrapped it
+             * in an InvocationTargetException.
+             * If possible re-throw the original exception so that normal
+             * exception handling will take place.
+             */
+
+            Throwable cause = e.getCause();
+            if (cause instanceof Exception) {
+               throw (Exception) cause;
+            } else if (cause instanceof Error) {
+               throw (Error) cause;
+            } else {
+               /*
+                * The cause is not an Exception or Error (must be Throwable) so
+                * just re-throw the wrapped exception.
+                */
+
+               throw e;
             }
-
-            if (alwaysInvokePrepare) {
-                ((Preparable) action).prepare();
-            }
-        }
-
-        return invocation.invoke();
-    }
-
+         }
+         if (alwaysInvokePrepare) {
+            ((Preparable) action).prepare();
+         }
+      }
+      return invocation.invoke();
+   }
 }

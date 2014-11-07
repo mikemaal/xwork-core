@@ -13,36 +13,38 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.opensymphony.xwork2.validator.validators;
 
 import com.opensymphony.xwork2.validator.FieldValidator;
-
+import java.io.Serializable;
 
 /**
  * Base class for field validators.
  *
  * @author Jason Carreira
  */
-public abstract class FieldValidatorSupport extends ValidatorSupport implements FieldValidator {
+public abstract class FieldValidatorSupport extends ValidatorSupport implements FieldValidator, Serializable {
 
-    private String fieldName;
-    private String type;
+   private String fieldName;
 
-    public void setFieldName(String fieldName) {
-        this.fieldName = fieldName;
-    }
+   private String type;
 
-    public String getFieldName() {
-        return fieldName;
-    }
+   public void setFieldName(String fieldName) {
+      this.fieldName = fieldName;
+   }
 
-    @Override
-    public void setValidatorType(String type) {
-        this.type = type;
-    }
+   public String getFieldName() {
+      return fieldName;
+   }
 
-    @Override
-    public String getValidatorType() {
-        return type;
-    }
+   @Override
+   public void setValidatorType(String type) {
+      this.type = type;
+   }
+
+   @Override
+   public String getValidatorType() {
+      return type;
+   }
 }

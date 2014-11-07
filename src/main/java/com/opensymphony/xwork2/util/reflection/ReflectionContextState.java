@@ -17,9 +17,9 @@
 package com.opensymphony.xwork2.util.reflection;
 
 import com.opensymphony.xwork2.conversion.impl.XWorkConverter;
-
 import java.util.HashMap;
 import java.util.Map;
+import java.io.Serializable;
 
 /**
  * Manages variables in the reflection context and returns values
@@ -27,153 +27,149 @@ import java.util.Map;
  *
  * @author Gabe
  */
-public class ReflectionContextState {
+public class ReflectionContextState implements Serializable {
 
-    public static final String CURRENT_PROPERTY_PATH="current.property.path";
-    public static final String FULL_PROPERTY_PATH="current.property.path";
-    private static final String GETTING_BY_KEY_PROPERTY="xwork.getting.by.key.property";
+   public static final String CURRENT_PROPERTY_PATH = "current.property.path";
 
-    private static final String SET_MAP_KEY="set.map.key";
+   public static final String FULL_PROPERTY_PATH = "current.property.path";
 
-    public static boolean isCreatingNullObjects(Map<String, Object> context) {
-		//TODO
-		return getBooleanProperty(ReflectionContextState.CREATE_NULL_OBJECTS, context);
-	}
+   private static final String GETTING_BY_KEY_PROPERTY = "xwork.getting.by.key.property";
 
-	public static void setCreatingNullObjects(Map<String, Object> context, boolean creatingNullObjects) {
-		setBooleanValue(ReflectionContextState.CREATE_NULL_OBJECTS, context, creatingNullObjects);
-	}
+   private static final String SET_MAP_KEY = "set.map.key";
 
-	public static boolean isGettingByKeyProperty(Map<String, Object> context) {
-		return getBooleanProperty(GETTING_BY_KEY_PROPERTY, context);
-	}
-	
-	public static void setDenyMethodExecution(Map<String, Object> context, boolean denyMethodExecution) {
-		setBooleanValue(ReflectionContextState.DENY_METHOD_EXECUTION, context, denyMethodExecution);
-	}
-	
-	public static boolean isDenyMethodExecution(Map<String, Object> context) {
-		return getBooleanProperty(ReflectionContextState.DENY_METHOD_EXECUTION, context);
-	}
+   public static boolean isCreatingNullObjects(Map<String, Object> context) {
+      //TODO
+      return getBooleanProperty(ReflectionContextState.CREATE_NULL_OBJECTS, context);
+   }
 
-	public static void setGettingByKeyProperty(Map<String, Object> context, boolean gettingByKeyProperty) {
-		setBooleanValue(GETTING_BY_KEY_PROPERTY, context, gettingByKeyProperty);
-	}	
-	
-	public static boolean isReportingConversionErrors(Map<String, Object> context) {
-		return getBooleanProperty(XWorkConverter.REPORT_CONVERSION_ERRORS, context);
-	}
+   public static void setCreatingNullObjects(Map<String, Object> context, boolean creatingNullObjects) {
+      setBooleanValue(ReflectionContextState.CREATE_NULL_OBJECTS, context, creatingNullObjects);
+   }
 
-	public static void setReportingConversionErrors(Map<String, Object> context, boolean reportingErrors) {
-		setBooleanValue(XWorkConverter.REPORT_CONVERSION_ERRORS, context, reportingErrors);
-	}
+   public static boolean isGettingByKeyProperty(Map<String, Object> context) {
+      return getBooleanProperty(GETTING_BY_KEY_PROPERTY, context);
+   }
 
-	public static Class getLastBeanClassAccessed(Map<String, Object> context) {
-		return (Class)context.get(XWorkConverter.LAST_BEAN_CLASS_ACCESSED);
-	}
+   public static void setDenyMethodExecution(Map<String, Object> context, boolean denyMethodExecution) {
+      setBooleanValue(ReflectionContextState.DENY_METHOD_EXECUTION, context, denyMethodExecution);
+   }
 
-	public static void setLastBeanPropertyAccessed(Map<String, Object> context, String property) {
-		context.put(XWorkConverter.LAST_BEAN_PROPERTY_ACCESSED, property);
-	}
+   public static boolean isDenyMethodExecution(Map<String, Object> context) {
+      return getBooleanProperty(ReflectionContextState.DENY_METHOD_EXECUTION, context);
+   }
 
-	public static String getLastBeanPropertyAccessed(Map<String, Object> context) {
-		return (String)context.get(XWorkConverter.LAST_BEAN_PROPERTY_ACCESSED);
-	}
+   public static void setGettingByKeyProperty(Map<String, Object> context, boolean gettingByKeyProperty) {
+      setBooleanValue(GETTING_BY_KEY_PROPERTY, context, gettingByKeyProperty);
+   }
 
-	public static void setLastBeanClassAccessed(Map<String, Object> context, Class clazz) {
-		context.put(XWorkConverter.LAST_BEAN_CLASS_ACCESSED, clazz);
-	}
-	/**
-	 * Gets the current property path but not completely.
-	 * It does not use the [ and ] used in some representations
-	 * of Maps and Lists. The reason for this is that the current
-	 * property path is only currently used for caching purposes
-	 * so there is no real reason to have an exact replica.
-     *
-	 * <p/>So if the real path is myProp.myMap['myKey'] this would
-	 * return myProp.myMap.myKey.
-     * 
-	 * @param context
-	 */
-	public static String getCurrentPropertyPath(Map<String, Object> context) {
-		return (String)context.get(CURRENT_PROPERTY_PATH);
-	}
+   public static boolean isReportingConversionErrors(Map<String, Object> context) {
+      return getBooleanProperty(XWorkConverter.REPORT_CONVERSION_ERRORS, context);
+   }
 
-	public static String getFullPropertyPath(Map<String, Object> context) {
-		return (String)context.get(FULL_PROPERTY_PATH);
-	}
+   public static void setReportingConversionErrors(Map<String, Object> context, boolean reportingErrors) {
+      setBooleanValue(XWorkConverter.REPORT_CONVERSION_ERRORS, context, reportingErrors);
+   }
 
-	public static void setFullPropertyPath(Map<String, Object> context, String path) {
-		context.put(FULL_PROPERTY_PATH, path);
+   public static Class getLastBeanClassAccessed(Map<String, Object> context) {
+      return (Class) context.get(XWorkConverter.LAST_BEAN_CLASS_ACCESSED);
+   }
 
-	}
+   public static void setLastBeanPropertyAccessed(Map<String, Object> context, String property) {
+      context.put(XWorkConverter.LAST_BEAN_PROPERTY_ACCESSED, property);
+   }
 
-	public static void updateCurrentPropertyPath(Map<String, Object> context, Object name) {
-		String currentPath=getCurrentPropertyPath(context);
-		if (name!=null) {
-			if (currentPath!=null) {
-                StringBuilder sb = new StringBuilder(currentPath);
-                sb.append(".");
-                sb.append(name.toString());
-				currentPath = sb.toString();
-			}	else {
-				currentPath = name.toString();
-			}
-			context.put(CURRENT_PROPERTY_PATH, currentPath);
-		}
-	}
+   public static String getLastBeanPropertyAccessed(Map<String, Object> context) {
+      return (String) context.get(XWorkConverter.LAST_BEAN_PROPERTY_ACCESSED);
+   }
 
-	public static void setSetMap(Map<String, Object> context, Map<Object, Object> setMap, String path) {
-		Map<Object, Map<Object, Object>> mapOfSetMaps=(Map)context.get(SET_MAP_KEY);
-		if (mapOfSetMaps==null) {
-			mapOfSetMaps=new HashMap<Object, Map<Object, Object>>();
-			context.put(SET_MAP_KEY, mapOfSetMaps);
-		}
-		mapOfSetMaps.put(path, setMap);
-	}
+   public static void setLastBeanClassAccessed(Map<String, Object> context, Class clazz) {
+      context.put(XWorkConverter.LAST_BEAN_CLASS_ACCESSED, clazz);
+   }
 
-	public static Map<Object, Object> getSetMap(Map<String, Object> context, String path) {
-		Map<Object, Map<Object, Object>> mapOfSetMaps=(Map)context.get(SET_MAP_KEY);
-		if (mapOfSetMaps==null) {
-			return null;
-		}
-		return mapOfSetMaps.get(path);
-	}
+   /**
+    * Gets the current property path but not completely.
+    * It does not use the [ and ] used in some representations
+    * of Maps and Lists. The reason for this is that the current
+    * property path is only currently used for caching purposes
+    * so there is no real reason to have an exact replica.
+    *
+    * <p/>So if the real path is myProp.myMap['myKey'] this would
+    * return myProp.myMap.myKey.
+    * 
+    * @param context
+    */
+   public static String getCurrentPropertyPath(Map<String, Object> context) {
+      return (String) context.get(CURRENT_PROPERTY_PATH);
+   }
 
-	private static boolean getBooleanProperty(String property, Map<String, Object> context) {
-		Boolean myBool=(Boolean)context.get(property);
-		return (myBool==null)?false:myBool.booleanValue();
-	}
+   public static String getFullPropertyPath(Map<String, Object> context) {
+      return (String) context.get(FULL_PROPERTY_PATH);
+   }
 
-	private static void setBooleanValue(String property, Map<String, Object> context, boolean value) {
-		context.put(property, new Boolean(value));
-	}
+   public static void setFullPropertyPath(Map<String, Object> context, String path) {
+      context.put(FULL_PROPERTY_PATH, path);
+   }
 
-	/**
-	 *
-	 */
-	public static void clearCurrentPropertyPath(Map<String, Object> context) {
-		context.put(CURRENT_PROPERTY_PATH, null);
+   public static void updateCurrentPropertyPath(Map<String, Object> context, Object name) {
+      String currentPath = getCurrentPropertyPath(context);
+      if (name != null) {
+         if (currentPath != null) {
+            StringBuilder sb = new StringBuilder(currentPath);
+            sb.append(".");
+            sb.append(name.toString());
+            currentPath = sb.toString();
+         } else {
+            currentPath = name.toString();
+         }
+         context.put(CURRENT_PROPERTY_PATH, currentPath);
+      }
+   }
 
-	}
+   public static void setSetMap(Map<String, Object> context, Map<Object, Object> setMap, String path) {
+      Map<Object, Map<Object, Object>> mapOfSetMaps = (Map) context.get(SET_MAP_KEY);
+      if (mapOfSetMaps == null) {
+         mapOfSetMaps = new HashMap<Object, Map<Object, Object>>();
+         context.put(SET_MAP_KEY, mapOfSetMaps);
+      }
+      mapOfSetMaps.put(path, setMap);
+   }
 
+   public static Map<Object, Object> getSetMap(Map<String, Object> context, String path) {
+      Map<Object, Map<Object, Object>> mapOfSetMaps = (Map) context.get(SET_MAP_KEY);
+      if (mapOfSetMaps == null) {
+         return null;
+      }
+      return mapOfSetMaps.get(path);
+   }
 
-    public static void clear(Map<String, Object> context) {
-        if (context != null) {
-            context.put(XWorkConverter.LAST_BEAN_CLASS_ACCESSED,null);
-            context.put(XWorkConverter.LAST_BEAN_PROPERTY_ACCESSED,null);
-    
-            context.put(CURRENT_PROPERTY_PATH,null);
-            context.put(FULL_PROPERTY_PATH,null);
-        }
+   private static boolean getBooleanProperty(String property, Map<String, Object> context) {
+      Boolean myBool = (Boolean) context.get(property);
+      return (myBool == null) ? false : myBool.booleanValue();
+   }
 
-    }
+   private static void setBooleanValue(String property, Map<String, Object> context, boolean value) {
+      context.put(property, new Boolean(value));
+   }
 
+   /**
+    *
+    */
+   public static void clearCurrentPropertyPath(Map<String, Object> context) {
+      context.put(CURRENT_PROPERTY_PATH, null);
+   }
 
-    public static final String CREATE_NULL_OBJECTS = "xwork.NullHandler.createNullObjects";
-    public static final String DENY_METHOD_EXECUTION = "xwork.MethodAccessor.denyMethodExecution";
-    public static final String DENY_INDEXED_ACCESS_EXECUTION = "xwork.IndexedPropertyAccessor.denyMethodExecution";
+   public static void clear(Map<String, Object> context) {
+      if (context != null) {
+         context.put(XWorkConverter.LAST_BEAN_CLASS_ACCESSED, null);
+         context.put(XWorkConverter.LAST_BEAN_PROPERTY_ACCESSED, null);
+         context.put(CURRENT_PROPERTY_PATH, null);
+         context.put(FULL_PROPERTY_PATH, null);
+      }
+   }
 
+   public static final String CREATE_NULL_OBJECTS = "xwork.NullHandler.createNullObjects";
 
+   public static final String DENY_METHOD_EXECUTION = "xwork.MethodAccessor.denyMethodExecution";
 
+   public static final String DENY_INDEXED_ACCESS_EXECUTION = "xwork.IndexedPropertyAccessor.denyMethodExecution";
 }

@@ -13,25 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.opensymphony.xwork2.ognl.accessor;
 
 import ognl.EnumerationPropertyAccessor;
 import ognl.ObjectPropertyAccessor;
 import ognl.OgnlException;
-
 import java.util.Map;
-
+import java.io.Serializable;
 
 /**
  * @author plightbo
  */
-public class XWorkEnumerationAccessor extends EnumerationPropertyAccessor {
+public class XWorkEnumerationAccessor extends EnumerationPropertyAccessor implements Serializable {
 
-    ObjectPropertyAccessor opa = new ObjectPropertyAccessor();
+   ObjectPropertyAccessor opa = new ObjectPropertyAccessor();
 
-
-    @Override
-    public void setProperty(Map context, Object target, Object name, Object value) throws OgnlException {
-        opa.setProperty(context, target, name, value);
-    }
+   @Override
+   public void setProperty(Map context, Object target, Object name, Object value) throws OgnlException {
+      opa.setProperty(context, target, name, value);
+   }
 }

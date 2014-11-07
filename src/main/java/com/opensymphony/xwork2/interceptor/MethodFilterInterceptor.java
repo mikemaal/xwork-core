@@ -20,10 +20,9 @@ import com.opensymphony.xwork2.ActionInvocation;
 import com.opensymphony.xwork2.util.TextParseUtil;
 import com.opensymphony.xwork2.util.logging.Logger;
 import com.opensymphony.xwork2.util.logging.LoggerFactory;
-
 import java.util.Collections;
 import java.util.Set;
-
+import java.io.Serializable;
 
 /**
  * <!-- START SNIPPET: javadoc -->
@@ -70,55 +69,56 @@ import java.util.Set;
  * 
  * @version $Date: 2009-12-27 19:18:29 +0100 (Sun, 27 Dec 2009) $ $Id: MethodFilterInterceptor.java 894090 2009-12-27 18:18:29Z martinc $
  */
-public abstract class MethodFilterInterceptor extends AbstractInterceptor {
-    protected transient Logger log = LoggerFactory.getLogger(getClass());
-    
-    protected Set<String> excludeMethods = Collections.emptySet();
-    protected Set<String> includeMethods = Collections.emptySet();
+public abstract class MethodFilterInterceptor extends AbstractInterceptor implements Serializable {
 
-    public void setExcludeMethods(String excludeMethods) {
-        this.excludeMethods = TextParseUtil.commaDelimitedStringToSet(excludeMethods);
-    }
-    
-    public Set<String> getExcludeMethodsSet() {
-    	return excludeMethods;
-    }
+   protected transient Logger log = LoggerFactory.getLogger(getClass());
 
-    public void setIncludeMethods(String includeMethods) {
-        this.includeMethods = TextParseUtil.commaDelimitedStringToSet(includeMethods);
-    }
-    
-    public Set<String> getIncludeMethodsSet() {
-    	return includeMethods;
-    }
+   protected Set<String> excludeMethods = Collections.emptySet();
 
-    @Override
-    public String intercept(ActionInvocation invocation) throws Exception {
-        if (applyInterceptor(invocation)) {
-            return doIntercept(invocation);
-        } 
-        return invocation.invoke();
-    }
+   protected Set<String> includeMethods = Collections.emptySet();
 
-    protected boolean applyInterceptor(ActionInvocation invocation) {
-        String method = invocation.getProxy().getMethod();
-        // ValidationInterceptor
-        boolean applyMethod = MethodFilterInterceptorUtil.applyMethod(excludeMethods, includeMethods, method);
-        if (log.isDebugEnabled()) {
-        	if (!applyMethod) {
-        		log.debug("Skipping Interceptor... Method [" + method + "] found in exclude list.");
-        	}
-        }
-        return applyMethod;
-    }
-    
-    /**
-     * Subclasses must override to implement the interceptor logic.
-     * 
-     * @param invocation the action invocation
-     * @return the result of invocation
-     * @throws Exception
-     */
-    protected abstract String doIntercept(ActionInvocation invocation) throws Exception;
-    
+   public void setExcludeMethods(String excludeMethods) {
+      this.excludeMethods = TextParseUtil.commaDelimitedStringToSet(excludeMethods);
+   }
+
+   public Set<String> getExcludeMethodsSet() {
+      return excludeMethods;
+   }
+
+   public void setIncludeMethods(String includeMethods) {
+      this.includeMethods = TextParseUtil.commaDelimitedStringToSet(includeMethods);
+   }
+
+   public Set<String> getIncludeMethodsSet() {
+      return includeMethods;
+   }
+
+   @Override
+   public String intercept(ActionInvocation invocation) throws Exception {
+      if (applyInterceptor(invocation)) {
+         return doIntercept(invocation);
+      }
+      return invocation.invoke();
+   }
+
+   protected boolean applyInterceptor(ActionInvocation invocation) {
+      String method = invocation.getProxy().getMethod();
+      // ValidationInterceptor
+      boolean applyMethod = MethodFilterInterceptorUtil.applyMethod(excludeMethods, includeMethods, method);
+      if (log.isDebugEnabled()) {
+         if (!applyMethod) {
+            log.debug("Skipping Interceptor... Method [" + method + "] found in exclude list.");
+         }
+      }
+      return applyMethod;
+   }
+
+   /**
+    * Subclasses must override to implement the interceptor logic.
+    * 
+    * @param invocation the action invocation
+    * @return the result of invocation
+    * @throws Exception
+    */
+   protected abstract String doIntercept(ActionInvocation invocation) throws Exception;
 }

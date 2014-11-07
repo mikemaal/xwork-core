@@ -20,107 +20,115 @@ import com.opensymphony.xwork2.ActionInvocation;
 import com.opensymphony.xwork2.ActionProxy;
 import com.opensymphony.xwork2.config.Configuration;
 import com.opensymphony.xwork2.config.entities.ActionConfig;
+import java.io.Serializable;
 
 /**
  * Mock for an {@link ActionProxy}.
  * 
  * @author Patrick Lightbody (plightbo at gmail dot com)
  */
-public class MockActionProxy implements ActionProxy {
-    
-    Object action;
-    String actionName;
-    ActionConfig config;
-    boolean executeResult;
-    ActionInvocation invocation;
-    String namespace;
-    String method;
-    boolean executedCalled;
-    String returnedResult;
-    Configuration configuration;
-    boolean methodSpecified;
+public class MockActionProxy implements ActionProxy, Serializable {
 
-    public void prepare() throws Exception {}
-    
-    public String execute() throws Exception {
-        executedCalled = true;
+   Object action;
 
-        return returnedResult;
-    }
+   String actionName;
 
-    public void setReturnedResult(String returnedResult) {
-        this.returnedResult = returnedResult;
-    }
+   ActionConfig config;
 
-    public boolean isExecutedCalled() {
-        return executedCalled;
-    }
+   boolean executeResult;
 
-    public Object getAction() {
-        return action;
-    }
+   ActionInvocation invocation;
 
-    public void setAction(Object action) {
-        this.action = action;
-    }
+   String namespace;
 
-    public String getActionName() {
-        return actionName;
-    }
+   String method;
 
-    public void setActionName(String actionName) {
-        this.actionName = actionName;
-    }
+   boolean executedCalled;
 
-    public ActionConfig getConfig() {
-        return config;
-    }
+   String returnedResult;
 
-    public void setConfig(ActionConfig config) {
-        this.config = config;
-    }
+   Configuration configuration;
 
-    public boolean getExecuteResult() {
-        return executeResult;
-    }
+   boolean methodSpecified;
 
-    public void setExecuteResult(boolean executeResult) {
-        this.executeResult = executeResult;
-    }
+   public void prepare() throws Exception {
+   }
 
-    public ActionInvocation getInvocation() {
-        return invocation;
-    }
+   public String execute() throws Exception {
+      executedCalled = true;
+      return returnedResult;
+   }
 
-    public void setInvocation(ActionInvocation invocation) {
-        this.invocation = invocation;
-    }
+   public void setReturnedResult(String returnedResult) {
+      this.returnedResult = returnedResult;
+   }
 
-    public String getNamespace() {
-        return namespace;
-    }
+   public boolean isExecutedCalled() {
+      return executedCalled;
+   }
 
-    public void setNamespace(String namespace) {
-        this.namespace = namespace;
-    }
+   public Object getAction() {
+      return action;
+   }
 
-    public String getMethod() {
-        return method;
-    }
+   public void setAction(Object action) {
+      this.action = action;
+   }
 
-    public void setMethod(String method) {
-        this.method = method;
-        methodSpecified=method!=null && !"".equals(method);
-    }
+   public String getActionName() {
+      return actionName;
+   }
 
-    public boolean isMethodSpecified()
-    {
-        return methodSpecified;
-    }
+   public void setActionName(String actionName) {
+      this.actionName = actionName;
+   }
 
-    public void setMethodSpecified(boolean methodSpecified)
-    {
-        this.methodSpecified = methodSpecified;
-    }
+   public ActionConfig getConfig() {
+      return config;
+   }
 
+   public void setConfig(ActionConfig config) {
+      this.config = config;
+   }
+
+   public boolean getExecuteResult() {
+      return executeResult;
+   }
+
+   public void setExecuteResult(boolean executeResult) {
+      this.executeResult = executeResult;
+   }
+
+   public ActionInvocation getInvocation() {
+      return invocation;
+   }
+
+   public void setInvocation(ActionInvocation invocation) {
+      this.invocation = invocation;
+   }
+
+   public String getNamespace() {
+      return namespace;
+   }
+
+   public void setNamespace(String namespace) {
+      this.namespace = namespace;
+   }
+
+   public String getMethod() {
+      return method;
+   }
+
+   public void setMethod(String method) {
+      this.method = method;
+      methodSpecified = method != null && !"".equals(method);
+   }
+
+   public boolean isMethodSpecified() {
+      return methodSpecified;
+   }
+
+   public void setMethodSpecified(boolean methodSpecified) {
+      this.methodSpecified = methodSpecified;
+   }
 }

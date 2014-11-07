@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.opensymphony.xwork2.validator;
 
 import com.opensymphony.xwork2.ActionInvocation;
@@ -23,6 +24,7 @@ import com.opensymphony.xwork2.interceptor.MethodFilterInterceptor;
 import com.opensymphony.xwork2.interceptor.PrefixMethodInvocationUtil;
 import com.opensymphony.xwork2.util.logging.Logger;
 import com.opensymphony.xwork2.util.logging.LoggerFactory;
+import java.io.Serializable;
 
 /**
  * <!-- START SNIPPET: description -->
@@ -124,166 +126,155 @@ import com.opensymphony.xwork2.util.logging.LoggerFactory;
  * @see ActionValidatorManager
  * @see com.opensymphony.xwork2.interceptor.DefaultWorkflowInterceptor
  */
-public class ValidationInterceptor extends MethodFilterInterceptor {
+public class ValidationInterceptor extends MethodFilterInterceptor implements Serializable {
 
-    private boolean validateAnnotatedMethodOnly;
-    
-    private ActionValidatorManager actionValidatorManager;
-    
-    private static final Logger LOG = LoggerFactory.getLogger(ValidationInterceptor.class);
-    
-    private final static String VALIDATE_PREFIX = "validate";
-    private final static String ALT_VALIDATE_PREFIX = "validateDo";
-    
-    private boolean alwaysInvokeValidate = true;
-    private boolean programmatic = true;
-    private boolean declarative = true;
+   private boolean validateAnnotatedMethodOnly;
 
-    @Inject
-    public void setActionValidatorManager(ActionValidatorManager mgr) {
-        this.actionValidatorManager = mgr;
-    }
-    
-    /**
-     * Determines if {@link Validateable}'s <code>validate()</code> should be called,
-     * as well as methods whose name that start with "validate". Defaults to "true".
-     * 
-     * @param programmatic <tt>true</tt> then <code>validate()</code> is invoked.
-     */
-    public void setProgrammatic(boolean programmatic) {
-        this.programmatic = programmatic;
-    }
+   private ActionValidatorManager actionValidatorManager;
 
-    /**
-     * Determines if validation based on annotations or xml should be performed. Defaults 
-     * to "true".
-     * 
-     * @param declarative <tt>true</tt> then perform validation based on annotations or xml.
-     */
-    public void setDeclarative(boolean declarative) {
-        this.declarative = declarative;
-    }
+   private static final Logger LOG = LoggerFactory.getLogger(ValidationInterceptor.class);
 
-    /**
-     * Determines if {@link Validateable}'s <code>validate()</code> should always 
-     * be invoked. Default to "true".
-     * 
-     * @param alwaysInvokeValidate <tt>true</tt> then <code>validate()</code> is always invoked.
-     */
-    public void setAlwaysInvokeValidate(String alwaysInvokeValidate) {
-            this.alwaysInvokeValidate = Boolean.parseBoolean(alwaysInvokeValidate);
-    }
+   private static final String VALIDATE_PREFIX = "validate";
 
-    /**
-     * Gets if <code>validate()</code> should always be called or only per annotated method.
-     *
-     * @return <tt>true</tt> to only validate per annotated method, otherwise <tt>false</tt> to always validate.
-     */
-    public boolean isValidateAnnotatedMethodOnly() {
-        return validateAnnotatedMethodOnly;
-    }
+   private static final String ALT_VALIDATE_PREFIX = "validateDo";
 
-    /**
-     * Determine if <code>validate()</code> should always be called or only per annotated method.
-     * Default to <tt>false</tt>.
-     *
-     * @param validateAnnotatedMethodOnly  <tt>true</tt> to only validate per annotated method, otherwise <tt>false</tt> to always validate.
-     */
-    public void setValidateAnnotatedMethodOnly(boolean validateAnnotatedMethodOnly) {
-        this.validateAnnotatedMethodOnly = validateAnnotatedMethodOnly;
-    }
+   private boolean alwaysInvokeValidate = true;
 
-    /**
-     * Gets the current action and its context and delegates to {@link ActionValidatorManager} proper validate method.
-     *
-     * @param invocation  the execution state of the Action.
-     * @throws Exception if an error occurs validating the action.
-     */
-    protected void doBeforeInvocation(ActionInvocation invocation) throws Exception {
-        Object action = invocation.getAction();
-        ActionProxy proxy = invocation.getProxy();
+   private boolean programmatic = true;
 
-        //the action name has to be from the url, otherwise validators that use aliases, like
-        //MyActio-someaction-validator.xml will not be found, see WW-3194
-        //UPDATE:  see WW-3753
-        String context = this.getValidationContext(proxy);
-        String method = proxy.getMethod();
+   private boolean declarative = true;
 
-        if (log.isDebugEnabled()) {
-            log.debug("Validating "
-                    + invocation.getProxy().getNamespace() + "/" + invocation.getProxy().getActionName() + " with method "+ method +".");
-        }
-        
+   @Inject
+   public void setActionValidatorManager(ActionValidatorManager mgr) {
+      this.actionValidatorManager = mgr;
+   }
 
-        if (declarative) {
-           if (validateAnnotatedMethodOnly) {
-               actionValidatorManager.validate(action, context, method);
-           } else {
-               actionValidatorManager.validate(action, context);
-           }
-       }    
-        
-        if (action instanceof Validateable && programmatic) {
-            // keep exception that might occured in validateXXX or validateDoXXX
-            Exception exception = null; 
-            
-            Validateable validateable = (Validateable) action;
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Invoking validate() on action "+validateable);
+   /**
+    * Determines if {@link Validateable}'s <code>validate()</code> should be called,
+    * as well as methods whose name that start with "validate". Defaults to "true".
+    * 
+    * @param programmatic <tt>true</tt> then <code>validate()</code> is invoked.
+    */
+   public void setProgrammatic(boolean programmatic) {
+      this.programmatic = programmatic;
+   }
+
+   /**
+    * Determines if validation based on annotations or xml should be performed. Defaults 
+    * to "true".
+    * 
+    * @param declarative <tt>true</tt> then perform validation based on annotations or xml.
+    */
+   public void setDeclarative(boolean declarative) {
+      this.declarative = declarative;
+   }
+
+   /**
+    * Determines if {@link Validateable}'s <code>validate()</code> should always 
+    * be invoked. Default to "true".
+    * 
+    * @param alwaysInvokeValidate <tt>true</tt> then <code>validate()</code> is always invoked.
+    */
+   public void setAlwaysInvokeValidate(String alwaysInvokeValidate) {
+      this.alwaysInvokeValidate = Boolean.parseBoolean(alwaysInvokeValidate);
+   }
+
+   /**
+    * Gets if <code>validate()</code> should always be called or only per annotated method.
+    *
+    * @return <tt>true</tt> to only validate per annotated method, otherwise <tt>false</tt> to always validate.
+    */
+   public boolean isValidateAnnotatedMethodOnly() {
+      return validateAnnotatedMethodOnly;
+   }
+
+   /**
+    * Determine if <code>validate()</code> should always be called or only per annotated method.
+    * Default to <tt>false</tt>.
+    *
+    * @param validateAnnotatedMethodOnly  <tt>true</tt> to only validate per annotated method, otherwise <tt>false</tt> to always validate.
+    */
+   public void setValidateAnnotatedMethodOnly(boolean validateAnnotatedMethodOnly) {
+      this.validateAnnotatedMethodOnly = validateAnnotatedMethodOnly;
+   }
+
+   /**
+    * Gets the current action and its context and delegates to {@link ActionValidatorManager} proper validate method.
+    *
+    * @param invocation  the execution state of the Action.
+    * @throws Exception if an error occurs validating the action.
+    */
+   protected void doBeforeInvocation(ActionInvocation invocation) throws Exception {
+      Object action = invocation.getAction();
+      ActionProxy proxy = invocation.getProxy();
+      //the action name has to be from the url, otherwise validators that use aliases, like
+      //MyActio-someaction-validator.xml will not be found, see WW-3194
+      //UPDATE:  see WW-3753
+      String context = this.getValidationContext(proxy);
+      String method = proxy.getMethod();
+      if (log.isDebugEnabled()) {
+         log.debug("Validating " + invocation.getProxy().getNamespace() + "/" + invocation.getProxy().getActionName()
+               + " with method " + method + ".");
+      }
+      if (declarative) {
+         if (validateAnnotatedMethodOnly) {
+            actionValidatorManager.validate(action, context, method);
+         } else {
+            actionValidatorManager.validate(action, context);
+         }
+      }
+      if (action instanceof Validateable && programmatic) {
+         // keep exception that might occured in validateXXX or validateDoXXX
+         Exception exception = null;
+         Validateable validateable = (Validateable) action;
+         if (LOG.isDebugEnabled()) {
+            LOG.debug("Invoking validate() on action " + validateable);
+         }
+         try {
+            PrefixMethodInvocationUtil.invokePrefixMethod(invocation, new String[] { VALIDATE_PREFIX,
+                  ALT_VALIDATE_PREFIX });
+         } catch (Exception e) {
+            // If any exception occurred while doing reflection, we want 
+            // validate() to be executed
+            if (LOG.isWarnEnabled()) {
+               LOG.warn("an exception occured while executing the prefix method", e);
             }
-            
-            try {
-                PrefixMethodInvocationUtil.invokePrefixMethod(
-                                invocation, 
-                                new String[] { VALIDATE_PREFIX, ALT_VALIDATE_PREFIX });
-            }
-            catch(Exception e) {
-                // If any exception occurred while doing reflection, we want 
-                // validate() to be executed
-                if (LOG.isWarnEnabled()) {
-                    LOG.warn("an exception occured while executing the prefix method", e);
-                }
-                exception = e;
-            }
-            
-            
-            if (alwaysInvokeValidate) {
-                validateable.validate();
-            }
-            
-            if (exception != null) { 
-                // rethrow if something is wrong while doing validateXXX / validateDoXXX 
-                throw exception;
-            }
-        }
-    }
+            exception = e;
+         }
+         if (alwaysInvokeValidate) {
+            validateable.validate();
+         }
+         if (exception != null) {
+            // rethrow if something is wrong while doing validateXXX / validateDoXXX 
+            throw exception;
+         }
+      }
+   }
 
-    @Override
-    protected String doIntercept(ActionInvocation invocation) throws Exception {
-        doBeforeInvocation(invocation);
-        
-        return invocation.invoke();
-    }
-    
-    /**
-     * Returns the context that will be used by the
-     * {@link ActionValidatorManager} to associate the action invocation with
-     * the appropriate {@link ValidatorConfig ValidatorConfigs}.
-     * <p>
-     * The context returned is used in the pattern
-     * <i>ActionClass-context-validation.xml</i>
-     * <p>
-     * The default context is the action name from the URL, but the method can
-     * be overridden to implement custom contexts.
-     * <p>
-     * This can be useful in cases in which a single action and a single model
-     * require vastly different validation based on some condition.
-     * 
-     * @return the Context
-     */
-    protected String getValidationContext(ActionProxy proxy) {
-        // This method created for WW-3753
-        return proxy.getActionName();
-    }
+   @Override
+   protected String doIntercept(ActionInvocation invocation) throws Exception {
+      doBeforeInvocation(invocation);
+      return invocation.invoke();
+   }
 
+   /**
+    * Returns the context that will be used by the
+    * {@link ActionValidatorManager} to associate the action invocation with
+    * the appropriate {@link ValidatorConfig ValidatorConfigs}.
+    * <p>
+    * The context returned is used in the pattern
+    * <i>ActionClass-context-validation.xml</i>
+    * <p>
+    * The default context is the action name from the URL, but the method can
+    * be overridden to implement custom contexts.
+    * <p>
+    * This can be useful in cases in which a single action and a single model
+    * require vastly different validation based on some condition.
+    * 
+    * @return the Context
+    */
+   protected String getValidationContext(ActionProxy proxy) {
+      // This method created for WW-3753
+      return proxy.getActionName();
+   }
 }

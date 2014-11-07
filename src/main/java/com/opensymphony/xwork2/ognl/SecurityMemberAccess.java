@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.opensymphony.xwork2.ognl;
 
 import ognl.DefaultMemberAccess;
-
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -25,105 +25,101 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.io.Serializable;
 
 /**
  * Allows access decisions to be made on the basis of whether a member is static or not.
  * Also blocks or allows access to properties.
  */
-public class SecurityMemberAccess extends DefaultMemberAccess {
+public class SecurityMemberAccess extends DefaultMemberAccess implements Serializable {
 
-    private final boolean allowStaticMethodAccess;
-    private Set<Pattern> excludeProperties = Collections.emptySet();
-    private Set<Pattern> acceptProperties = Collections.emptySet();
-    private PropertiesJudge propertiesJudge;
+   private final boolean allowStaticMethodAccess;
 
-    public SecurityMemberAccess(boolean method) {
-        super(false);
-        allowStaticMethodAccess = method;
-    }
+   private Set<Pattern> excludeProperties = Collections.emptySet();
 
-    public boolean getAllowStaticMethodAccess() {
-        return allowStaticMethodAccess;
-    }
+   private Set<Pattern> acceptProperties = Collections.emptySet();
 
-    @Override
-    public boolean isAccessible(Map context, Object target, Member member,
-                                String propertyName) {
+   private PropertiesJudge propertiesJudge;
 
-        boolean allow = true;
-        int modifiers = member.getModifiers();
-        if (Modifier.isStatic(modifiers)) {
-            if (member instanceof Method && !getAllowStaticMethodAccess()) {
-                allow = false;
-                if (target instanceof Class) {
-                    Class clazz = (Class) target;
-                    Method method = (Method) member;
-                    if (Enum.class.isAssignableFrom(clazz) && method.getName().equals("values"))
-                        allow = true;
-                }
+   public SecurityMemberAccess(boolean method) {
+      super(false);
+      allowStaticMethodAccess = method;
+   }
+
+   public boolean getAllowStaticMethodAccess() {
+      return allowStaticMethodAccess;
+   }
+
+   @Override
+   public boolean isAccessible(Map context, Object target, Member member, String propertyName) {
+      boolean allow = true;
+      int modifiers = member.getModifiers();
+      if (Modifier.isStatic(modifiers)) {
+         if (member instanceof Method && !getAllowStaticMethodAccess()) {
+            allow = false;
+            if (target instanceof Class) {
+               Class clazz = (Class) target;
+               Method method = (Method) member;
+               if (Enum.class.isAssignableFrom(clazz) && method.getName().equals("values"))
+                  allow = true;
             }
-        }
+         }
+      }
+      //failed static test
+      if (!allow)
+         return false;
+      // Now check for standard scope rules
+      if (!super.isAccessible(context, target, member, propertyName))
+         return false;
+      return isAcceptableProperty(propertyName);
+   }
 
-        //failed static test
-        if (!allow)
-            return false;
+   protected boolean isAcceptableProperty(String name) {
+      if (name == null) {
+         return true;
+      }
+      if ((!isExcluded(name)) && isAccepted(name) && (propertiesJudge == null || propertiesJudge.acceptProperty(name))) {
+         return true;
+      }
+      return false;
+   }
 
-        // Now check for standard scope rules
-        if (!super.isAccessible(context, target, member, propertyName))
-            return false;
-
-        return isAcceptableProperty(propertyName);
-    }
-
-    protected boolean isAcceptableProperty(String name) {
-        if ( name == null) {
-            return true;
-        }
-
-        if ((!isExcluded(name)) && isAccepted(name) && (propertiesJudge == null || propertiesJudge.acceptProperty(name))) {
-            return true;
-        }
-        return false;
-    }
-
-    protected boolean isAccepted(String paramName) {
-        if (!this.acceptProperties.isEmpty()) {
-            for (Pattern pattern : acceptProperties) {
-                Matcher matcher = pattern.matcher(paramName);
-                if (matcher.matches()) {
-                    return true;
-                }
+   protected boolean isAccepted(String paramName) {
+      if (!this.acceptProperties.isEmpty()) {
+         for (Pattern pattern : acceptProperties) {
+            Matcher matcher = pattern.matcher(paramName);
+            if (matcher.matches()) {
+               return true;
             }
+         }
+         //no match, but acceptedParams is not empty
+         return false;
+      }
+      //empty acceptedParams
+      return true;
+   }
 
-            //no match, but acceptedParams is not empty
-            return false;
-        }
-
-        //empty acceptedParams
-        return true;
-    }
-
-    protected boolean isExcluded(String paramName) {
-        if (!this.excludeProperties.isEmpty()) {
-            for (Pattern pattern : excludeProperties) {
-                Matcher matcher = pattern.matcher(paramName);
-                if (matcher.matches()) {
-                    return true;
-                }
+   protected boolean isExcluded(String paramName) {
+      if (!this.excludeProperties.isEmpty()) {
+         for (Pattern pattern : excludeProperties) {
+            Matcher matcher = pattern.matcher(paramName);
+            if (matcher.matches()) {
+               return true;
             }
-        }
-        return false;
-    }
+         }
+      }
+      return false;
+   }
 
-    public void setExcludeProperties(Set<Pattern> excludeProperties) {
-        this.excludeProperties = excludeProperties;
-    }
+   public void setExcludeProperties(Set<Pattern> excludeProperties) {
+      this.excludeProperties = excludeProperties;
+   }
 
-    public void setAcceptProperties(Set<Pattern> acceptedProperties) {
-        this.acceptProperties = acceptedProperties;
-    }
+   public void setAcceptProperties(Set<Pattern> acceptedProperties) {
+      this.acceptProperties = acceptedProperties;
+   }
 
-    public void setPropertiesJudge(PropertiesJudge judge) {
-        this.propertiesJudge = judge;
-    }
+   public void setPropertiesJudge(PropertiesJudge judge) {
+      this.propertiesJudge = judge;
+   }
 }

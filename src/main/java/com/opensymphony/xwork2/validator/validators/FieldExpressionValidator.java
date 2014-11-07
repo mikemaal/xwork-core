@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.opensymphony.xwork2.validator.validators;
 
 import com.opensymphony.xwork2.validator.ValidationException;
-
+import java.io.Serializable;
 
 /**
  * <!-- START SNIPPET: javadoc -->
@@ -58,40 +59,36 @@ import com.opensymphony.xwork2.validator.ValidationException;
  * @author $Author: lukaszlenart $
  * @version $Revision: 1457704 $
  */
-public class FieldExpressionValidator extends FieldValidatorSupport {
+public class FieldExpressionValidator extends FieldValidatorSupport implements Serializable {
 
-    private String expression;
+   private String expression;
 
-    public void setExpression(String expression) {
-        this.expression = expression;
-    }
+   public void setExpression(String expression) {
+      this.expression = expression;
+   }
 
-    public String getExpression() {
-        return expression;
-    }
+   public String getExpression() {
+      return expression;
+   }
 
-    public void validate(Object object) throws ValidationException {
-        String fieldName = getFieldName();
-
-        Boolean answer = Boolean.FALSE;
-        Object obj = null;
-
-        try {
-            obj = getFieldValue(expression, object);
-        } catch (ValidationException e) {
-            throw e;
-        } catch (Exception e) {
-            // let this pass, but it will be logged right below
-        }
-
-        if ((obj != null) && (obj instanceof Boolean)) {
-            answer = (Boolean) obj;
-        } else {
-            log.warn("Got result of " + obj + " when trying to get Boolean.");
-        }
-
-        if (!answer.booleanValue()) {
-            addFieldError(fieldName, object);
-        }
-    }
+   public void validate(Object object) throws ValidationException {
+      String fieldName = getFieldName();
+      Boolean answer = Boolean.FALSE;
+      Object obj = null;
+      try {
+         obj = getFieldValue(expression, object);
+      } catch (ValidationException e) {
+         throw e;
+      } catch (Exception e) {
+         // let this pass, but it will be logged right below
+      }
+      if ((obj != null) && (obj instanceof Boolean)) {
+         answer = (Boolean) obj;
+      } else {
+         log.warn("Got result of " + obj + " when trying to get Boolean.");
+      }
+      if (!answer.booleanValue()) {
+         addFieldError(fieldName, object);
+      }
+   }
 }

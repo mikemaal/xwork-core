@@ -13,27 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.opensymphony.xwork2.config.entities;
 
-public class UnknownHandlerConfig {
+import java.io.Serializable;
 
-    private String name;
+public class UnknownHandlerConfig implements Serializable {
 
-    public UnknownHandlerConfig(String name) {
-        this.name = name;
-    }
+   private String name;
 
-    public String getName() {
-        return name;
-    }
+   public UnknownHandlerConfig(String name) {
+      this.name = name;
+   }
 
-    public void setName(String name) {
-        this.name = name;
-    }
+   public String getName() {
+      return name;
+   }
 
-    @Override
-    public String toString() {
-        return "UnknownHandlerConfig: [" + name + "]";
-    }
+   public void setName(String name) {
+      this.name = name;
+   }
 
+   @Override
+   public String toString() {
+      return "UnknownHandlerConfig: [" + name + "]";
+   }
 }

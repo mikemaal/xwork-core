@@ -12,11 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.opensymphony.xwork2.util;
 
 import com.opensymphony.xwork2.util.logging.Logger;
 import com.opensymphony.xwork2.util.logging.LoggerFactory;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -28,6 +28,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
+import java.io.Serializable;
 
 /**
  * <p>ResolverUtil is used to locate classes that are available in the/a class path and meet
@@ -64,403 +65,410 @@ import java.util.jar.JarInputStream;
  * 
  * @author Tim Fennell
  */
-public class ResolverUtil<T> {
-    /** An instance of Log to use for logging in this class. */
-    private static final Logger LOG = LoggerFactory.getLogger(ResolverUtil.class);
+public class ResolverUtil<T> implements Serializable {
 
-    /**
-     * A simple interface that specifies how to test classes to determine if they
-     * are to be included in the results produced by the ResolverUtil.
-     */
-    public static interface Test {
-        /**
-         * Will be called repeatedly with candidate classes. Must return True if a class
-         * is to be included in the results, false otherwise.
-         */
-        boolean matches(Class type);
-        
-        boolean matches(URL resource);
+   /** An instance of Log to use for logging in this class. */
+   private static final Logger LOG = LoggerFactory.getLogger(ResolverUtil.class);
 
-        boolean doesMatchClass();
-        boolean doesMatchResource();
-    }
-    
-    public static abstract class ClassTest implements Test {
-        public boolean matches(URL resource) {
-            throw new UnsupportedOperationException();
-        }
+   /**
+    * A simple interface that specifies how to test classes to determine if they
+    * are to be included in the results produced by the ResolverUtil.
+    */
+   public static interface Test {
 
-        public boolean doesMatchClass() {
-            return true;
-        }
-        public boolean doesMatchResource() {
-            return false;
-        }
-    }
-    
-    public static abstract class ResourceTest implements Test {
-        public boolean matches(Class cls) {
-            throw new UnsupportedOperationException();
-        }
+      /**
+       * Will be called repeatedly with candidate classes. Must return True if a class
+       * is to be included in the results, false otherwise.
+       */
+      boolean matches(Class type);
 
-        public boolean doesMatchClass() {
-            return false;
-        }
-        public boolean doesMatchResource() {
-            return true;
-        }
-    }
+      boolean matches(URL resource);
 
-    /**
-     * A Test that checks to see if each class is assignable to the provided class. Note
-     * that this test will match the parent type itself if it is presented for matching.
-     */
-    public static class IsA extends ClassTest {
-        private Class parent;
+      boolean doesMatchClass();
 
-        /** Constructs an IsA test using the supplied Class as the parent class/interface. */
-        public IsA(Class parentType) { this.parent = parentType; }
+      boolean doesMatchResource();
+   }
 
-        /** Returns true if type is assignable to the parent type supplied in the constructor. */
-        public boolean matches(Class type) {
-            return type != null && parent.isAssignableFrom(type);
-        }
+   public abstract static class ClassTest implements Test {
 
-        @Override public String toString() {
-            return "is assignable to " + parent.getSimpleName();
-        }
-    }
-    
-    /**
-     * A Test that checks to see if each class name ends with the provided suffix.
-     */
-    public static class NameEndsWith extends ClassTest {
-        private String suffix;
+      public boolean matches(URL resource) {
+         throw new UnsupportedOperationException();
+      }
 
-        /** Constructs a NameEndsWith test using the supplied suffix. */
-        public NameEndsWith(String suffix) { this.suffix = suffix; }
+      public boolean doesMatchClass() {
+         return true;
+      }
 
-        /** Returns true if type name ends with the suffix supplied in the constructor. */
-        public boolean matches(Class type) {
-            return type != null && type.getName().endsWith(suffix);
-        }
+      public boolean doesMatchResource() {
+         return false;
+      }
+   }
 
-        @Override public String toString() {
-            return "ends with the suffix " + suffix;
-        }
-    }
+   public abstract static class ResourceTest implements Test {
 
-    /**
-     * A Test that checks to see if each class is annotated with a specific annotation. If it
-     * is, then the test returns true, otherwise false.
-     */
-    public static class AnnotatedWith extends ClassTest {
-        private Class<? extends Annotation> annotation;
+      public boolean matches(Class cls) {
+         throw new UnsupportedOperationException();
+      }
 
-        /** Construts an AnnotatedWith test for the specified annotation type. */
-        public AnnotatedWith(Class<? extends Annotation> annotation) { this.annotation = annotation; }
+      public boolean doesMatchClass() {
+         return false;
+      }
 
-        /** Returns true if the type is annotated with the class provided to the constructor. */
-        public boolean matches(Class type) {
-            return type != null && type.isAnnotationPresent(annotation);
-        }
+      public boolean doesMatchResource() {
+         return true;
+      }
+   }
 
-        @Override public String toString() {
-            return "annotated with @" + annotation.getSimpleName();
-        }
-    }
-    
-    public static class NameIs extends ResourceTest {
-        private String name;
-        
-        public NameIs(String name) { this.name = "/" + name; }
-        
-        public boolean matches(URL resource) {
-            return (resource.getPath().endsWith(name));
-        }
-        
-        @Override public String toString() {
-            return "named " + name;
-        }
-    }
+   /**
+    * A Test that checks to see if each class is assignable to the provided class. Note
+    * that this test will match the parent type itself if it is presented for matching.
+    */
+   public static class IsA extends ClassTest {
 
-    /** The set of matches being accumulated. */
-    private Set<Class<? extends T>> classMatches = new HashSet<Class<?extends T>>();
-    
-    /** The set of matches being accumulated. */
-    private Set<URL> resourceMatches = new HashSet<URL>();
+      private Class parent;
 
-    /**
-     * The ClassLoader to use when looking for classes. If null then the ClassLoader returned
-     * by Thread.currentThread().getContextClassLoader() will be used.
-     */
-    private ClassLoader classloader;
+      /** Constructs an IsA test using the supplied Class as the parent class/interface. */
+      public IsA(Class parentType) {
+         this.parent = parentType;
+      }
 
-    /**
-     * Provides access to the classes discovered so far. If no calls have been made to
-     * any of the {@code find()} methods, this set will be empty.
-     *
-     * @return the set of classes that have been discovered.
-     */
-    public Set<Class<? extends T>> getClasses() {
-        return classMatches;
-    }
-    
-    public Set<URL> getResources() {
-        return resourceMatches;
-    }
-    
+      /** Returns true if type is assignable to the parent type supplied in the constructor. */
+      public boolean matches(Class type) {
+         return type != null && parent.isAssignableFrom(type);
+      }
 
-    /**
-     * Returns the classloader that will be used for scanning for classes. If no explicit
-     * ClassLoader has been set by the calling, the context class loader will be used.
-     *
-     * @return the ClassLoader that will be used to scan for classes
-     */
-    public ClassLoader getClassLoader() {
-        return classloader == null ? Thread.currentThread().getContextClassLoader() : classloader;
-    }
+      @Override
+      public String toString() {
+         return "is assignable to " + parent.getSimpleName();
+      }
+   }
 
-    /**
-     * Sets an explicit ClassLoader that should be used when scanning for classes. If none
-     * is set then the context classloader will be used.
-     *
-     * @param classloader a ClassLoader to use when scanning for classes
-     */
-    public void setClassLoader(ClassLoader classloader) { this.classloader = classloader; }
+   /**
+    * A Test that checks to see if each class name ends with the provided suffix.
+    */
+   public static class NameEndsWith extends ClassTest {
 
-    /**
-     * Attempts to discover classes that are assignable to the type provided. In the case
-     * that an interface is provided this method will collect implementations. In the case
-     * of a non-interface class, subclasses will be collected.  Accumulated classes can be
-     * accessed by calling {@link #getClasses()}.
-     *
-     * @param parent the class of interface to find subclasses or implementations of
-     * @param packageNames one or more package names to scan (including subpackages) for classes
-     */
-    public void findImplementations(Class parent, String... packageNames) {
-        if (packageNames == null) return;
+      private String suffix;
 
-        Test test = new IsA(parent);
-        for (String pkg : packageNames) {
-            findInPackage(test, pkg);
-        }
-    }
-    
-    /**
-     * Attempts to discover classes who's name ends with the provided suffix. Accumulated classes can be
-     * accessed by calling {@link #getClasses()}.
-     *
-     * @param suffix The class name suffix to match
-     * @param packageNames one or more package names to scan (including subpackages) for classes
-     */
-    public void findSuffix(String suffix, String... packageNames) {
-        if (packageNames == null) return;
+      /** Constructs a NameEndsWith test using the supplied suffix. */
+      public NameEndsWith(String suffix) {
+         this.suffix = suffix;
+      }
 
-        Test test = new NameEndsWith(suffix);
-        for (String pkg : packageNames) {
-            findInPackage(test, pkg);
-        }
-    }
+      /** Returns true if type name ends with the suffix supplied in the constructor. */
+      public boolean matches(Class type) {
+         return type != null && type.getName().endsWith(suffix);
+      }
 
-    /**
-     * Attempts to discover classes that are annotated with to the annotation. Accumulated
-     * classes can be accessed by calling {@link #getClasses()}.
-     *
-     * @param annotation the annotation that should be present on matching classes
-     * @param packageNames one or more package names to scan (including subpackages) for classes
-     */
-    public void findAnnotated(Class<? extends Annotation> annotation, String... packageNames) {
-        if (packageNames == null) return;
+      @Override
+      public String toString() {
+         return "ends with the suffix " + suffix;
+      }
+   }
 
-        Test test = new AnnotatedWith(annotation);
-        for (String pkg : packageNames) {
-            findInPackage(test, pkg);
-        }
-    }
-    
-    public void findNamedResource(String name, String... pathNames) {
-        if (pathNames == null) return;
-        
-        Test test = new NameIs(name);
-        for (String pkg : pathNames) {
-            findInPackage(test, pkg);
-        }
-    }
-    
-    /**
-     * Attempts to discover classes that pass the test. Accumulated
-     * classes can be accessed by calling {@link #getClasses()}.
-     *
-     * @param test the test to determine matching classes
-     * @param packageNames one or more package names to scan (including subpackages) for classes
-     */
-    public void find(Test test, String... packageNames) {
-        if (packageNames == null) return;
+   /**
+    * A Test that checks to see if each class is annotated with a specific annotation. If it
+    * is, then the test returns true, otherwise false.
+    */
+   public static class AnnotatedWith extends ClassTest {
 
-        for (String pkg : packageNames) {
-            findInPackage(test, pkg);
-        }
-    }
+      private Class<? extends Annotation> annotation;
 
-    /**
-     * Scans for classes starting at the package provided and descending into subpackages.
-     * Each class is offered up to the Test as it is discovered, and if the Test returns
-     * true the class is retained.  Accumulated classes can be fetched by calling
-     * {@link #getClasses()}.
-     *
-     * @param test an instance of {@link Test} that will be used to filter classes
-     * @param packageName the name of the package from which to start scanning for
-     *        classes, e.g. {@code net.sourceforge.stripes}
-     */
-    public void findInPackage(Test test, String packageName) {
-        packageName = packageName.replace('.', '/');
-        ClassLoader loader = getClassLoader();
-        Enumeration<URL> urls;
+      /** Construts an AnnotatedWith test for the specified annotation type. */
+      public AnnotatedWith(Class<? extends Annotation> annotation) {
+         this.annotation = annotation;
+      }
 
-        try {
-            urls = loader.getResources(packageName);
-        }
-        catch (IOException ioe) {
-            if (LOG.isWarnEnabled()) {
-        	LOG.warn("Could not read package: " + packageName, ioe);
+      /** Returns true if the type is annotated with the class provided to the constructor. */
+      public boolean matches(Class type) {
+         return type != null && type.isAnnotationPresent(annotation);
+      }
+
+      @Override
+      public String toString() {
+         return "annotated with @" + annotation.getSimpleName();
+      }
+   }
+
+   public static class NameIs extends ResourceTest {
+
+      private String name;
+
+      public NameIs(String name) {
+         this.name = "/" + name;
+      }
+
+      public boolean matches(URL resource) {
+         return (resource.getPath().endsWith(name));
+      }
+
+      @Override
+      public String toString() {
+         return "named " + name;
+      }
+   }
+
+   /** The set of matches being accumulated. */
+   private Set<Class<? extends T>> classMatches = new HashSet<Class<? extends T>>();
+
+   /** The set of matches being accumulated. */
+   private Set<URL> resourceMatches = new HashSet<URL>();
+
+   /**
+    * The ClassLoader to use when looking for classes. If null then the ClassLoader returned
+    * by Thread.currentThread().getContextClassLoader() will be used.
+    */
+   private ClassLoader classloader;
+
+   /**
+    * Provides access to the classes discovered so far. If no calls have been made to
+    * any of the {@code find()} methods, this set will be empty.
+    *
+    * @return the set of classes that have been discovered.
+    */
+   public Set<Class<? extends T>> getClasses() {
+      return classMatches;
+   }
+
+   public Set<URL> getResources() {
+      return resourceMatches;
+   }
+
+   /**
+    * Returns the classloader that will be used for scanning for classes. If no explicit
+    * ClassLoader has been set by the calling, the context class loader will be used.
+    *
+    * @return the ClassLoader that will be used to scan for classes
+    */
+   public ClassLoader getClassLoader() {
+      return classloader == null ? Thread.currentThread().getContextClassLoader() : classloader;
+   }
+
+   /**
+    * Sets an explicit ClassLoader that should be used when scanning for classes. If none
+    * is set then the context classloader will be used.
+    *
+    * @param classloader a ClassLoader to use when scanning for classes
+    */
+   public void setClassLoader(ClassLoader classloader) {
+      this.classloader = classloader;
+   }
+
+   /**
+    * Attempts to discover classes that are assignable to the type provided. In the case
+    * that an interface is provided this method will collect implementations. In the case
+    * of a non-interface class, subclasses will be collected.  Accumulated classes can be
+    * accessed by calling {@link #getClasses()}.
+    *
+    * @param parent the class of interface to find subclasses or implementations of
+    * @param packageNames one or more package names to scan (including subpackages) for classes
+    */
+   public void findImplementations(Class parent, String... packageNames) {
+      if (packageNames == null)
+         return;
+      Test test = new IsA(parent);
+      for (String pkg : packageNames) {
+         findInPackage(test, pkg);
+      }
+   }
+
+   /**
+    * Attempts to discover classes who's name ends with the provided suffix. Accumulated classes can be
+    * accessed by calling {@link #getClasses()}.
+    *
+    * @param suffix The class name suffix to match
+    * @param packageNames one or more package names to scan (including subpackages) for classes
+    */
+   public void findSuffix(String suffix, String... packageNames) {
+      if (packageNames == null)
+         return;
+      Test test = new NameEndsWith(suffix);
+      for (String pkg : packageNames) {
+         findInPackage(test, pkg);
+      }
+   }
+
+   /**
+    * Attempts to discover classes that are annotated with to the annotation. Accumulated
+    * classes can be accessed by calling {@link #getClasses()}.
+    *
+    * @param annotation the annotation that should be present on matching classes
+    * @param packageNames one or more package names to scan (including subpackages) for classes
+    */
+   public void findAnnotated(Class<? extends Annotation> annotation, String... packageNames) {
+      if (packageNames == null)
+         return;
+      Test test = new AnnotatedWith(annotation);
+      for (String pkg : packageNames) {
+         findInPackage(test, pkg);
+      }
+   }
+
+   public void findNamedResource(String name, String... pathNames) {
+      if (pathNames == null)
+         return;
+      Test test = new NameIs(name);
+      for (String pkg : pathNames) {
+         findInPackage(test, pkg);
+      }
+   }
+
+   /**
+    * Attempts to discover classes that pass the test. Accumulated
+    * classes can be accessed by calling {@link #getClasses()}.
+    *
+    * @param test the test to determine matching classes
+    * @param packageNames one or more package names to scan (including subpackages) for classes
+    */
+   public void find(Test test, String... packageNames) {
+      if (packageNames == null)
+         return;
+      for (String pkg : packageNames) {
+         findInPackage(test, pkg);
+      }
+   }
+
+   /**
+    * Scans for classes starting at the package provided and descending into subpackages.
+    * Each class is offered up to the Test as it is discovered, and if the Test returns
+    * true the class is retained.  Accumulated classes can be fetched by calling
+    * {@link #getClasses()}.
+    *
+    * @param test an instance of {@link Test} that will be used to filter classes
+    * @param packageName the name of the package from which to start scanning for
+    *        classes, e.g. {@code net.sourceforge.stripes}
+    */
+   public void findInPackage(Test test, String packageName) {
+      packageName = packageName.replace('.', '/');
+      ClassLoader loader = getClassLoader();
+      Enumeration<URL> urls;
+      try {
+         urls = loader.getResources(packageName);
+      } catch (IOException ioe) {
+         if (LOG.isWarnEnabled()) {
+            LOG.warn("Could not read package: " + packageName, ioe);
+         }
+         return;
+      }
+      while (urls.hasMoreElements()) {
+         try {
+            String urlPath = urls.nextElement().getFile();
+            urlPath = URLDecoder.decode(urlPath, "UTF-8");
+            // If it's a file in a directory, trim the stupid file: spec
+            if (urlPath.startsWith("file:")) {
+               urlPath = urlPath.substring(5);
             }
-            return;
-        }
-
-        while (urls.hasMoreElements()) {
-            try {
-                String urlPath = urls.nextElement().getFile();
-                urlPath = URLDecoder.decode(urlPath, "UTF-8");
-
-                // If it's a file in a directory, trim the stupid file: spec
-                if ( urlPath.startsWith("file:") ) {
-                    urlPath = urlPath.substring(5);
-                }
-
-                // Else it's in a JAR, grab the path to the jar
-                if (urlPath.indexOf('!') > 0) {
-                    urlPath = urlPath.substring(0, urlPath.indexOf('!'));
-                }
-
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("Scanning for classes in [" + urlPath + "] matching criteria: " + test);
-                }
-                File file = new File(urlPath);
-                if ( file.isDirectory() ) {
-                    loadImplementationsInDirectory(test, packageName, file);
-                }
-                else {
-                    loadImplementationsInJar(test, packageName, file);
-                }
+            // Else it's in a JAR, grab the path to the jar
+            if (urlPath.indexOf('!') > 0) {
+               urlPath = urlPath.substring(0, urlPath.indexOf('!'));
             }
-            catch (IOException ioe) {
-                if (LOG.isWarnEnabled()) {
-                    LOG.warn("could not read entries", ioe);
-                }
+            if (LOG.isInfoEnabled()) {
+               LOG.info("Scanning for classes in [" + urlPath + "] matching criteria: " + test);
             }
-        }
-    }
-
-
-    /**
-     * Finds matches in a physical directory on a filesystem.  Examines all
-     * files within a directory - if the File object is not a directory, and ends with <i>.class</i>
-     * the file is loaded and tested to see if it is acceptable according to the Test.  Operates
-     * recursively to find classes within a folder structure matching the package structure.
-     *
-     * @param test a Test used to filter the classes that are discovered
-     * @param parent the package name up to this directory in the package hierarchy.  E.g. if
-     *        /classes is in the classpath and we wish to examine files in /classes/org/apache then
-     *        the values of <i>parent</i> would be <i>org/apache</i>
-     * @param location a File object representing a directory
-     */
-    private void loadImplementationsInDirectory(Test test, String parent, File location) {
-        File[] files = location.listFiles();
-        StringBuilder builder = null;
-
-        for (File file : files) {
-            builder = new StringBuilder(100);
-            builder.append(parent).append("/").append(file.getName());
-            String packageOrClass = ( parent == null ? file.getName() : builder.toString() );
-
+            File file = new File(urlPath);
             if (file.isDirectory()) {
-                loadImplementationsInDirectory(test, packageOrClass, file);
+               loadImplementationsInDirectory(test, packageName, file);
+            } else {
+               loadImplementationsInJar(test, packageName, file);
             }
-            else if (isTestApplicable(test, file.getName())) {
-                addIfMatching(test, packageOrClass);
-            }
-        }
-    }
-
-    private boolean isTestApplicable(Test test, String path) {
-        return test.doesMatchResource() || path.endsWith(".class") && test.doesMatchClass();
-    }
-
-    /**
-     * Finds matching classes within a jar files that contains a folder structure
-     * matching the package structure.  If the File is not a JarFile or does not exist a warning
-     * will be logged, but no error will be raised.
-     *
-     * @param test a Test used to filter the classes that are discovered
-     * @param parent the parent package under which classes must be in order to be considered
-     * @param jarfile the jar file to be examined for classes
-     */
-    private void loadImplementationsInJar(Test test, String parent, File jarfile) {
-
-        try {
-            JarEntry entry;
-            JarInputStream jarStream = new JarInputStream(new FileInputStream(jarfile));
-
-            while ( (entry = jarStream.getNextJarEntry() ) != null) {
-                String name = entry.getName();
-                if (!entry.isDirectory() && name.startsWith(parent) && isTestApplicable(test, name)) {
-                    addIfMatching(test, name);
-                }
-            }
-        }
-        catch (IOException ioe) {
-            LOG.error("Could not search jar file '" + jarfile + "' for classes matching criteria: " +
-                      test + " due to an IOException", ioe);
-        }
-    }
-
-    /**
-     * Add the class designated by the fully qualified class name provided to the set of
-     * resolved classes if and only if it is approved by the Test supplied.
-     *
-     * @param test the test used to determine if the class matches
-     * @param fqn the fully qualified name of a class
-     */
-    protected void addIfMatching(Test test, String fqn) {
-        try {
-            ClassLoader loader = getClassLoader();
-            if (test.doesMatchClass()) {
-                String externalName = fqn.substring(0, fqn.indexOf('.')).replace('/', '.');
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Checking to see if class " + externalName + " matches criteria [" + test + "]");
-                }
-    
-                Class type = loader.loadClass(externalName);
-                if (test.matches(type) ) {
-                    classMatches.add( (Class<T>) type);
-                }
-            }
-            if (test.doesMatchResource()) {
-                URL url = loader.getResource(fqn);
-                if (url == null) {
-                    url = loader.getResource(fqn.substring(1));
-                }
-                if (url != null && test.matches(url)) {
-                    resourceMatches.add(url);
-                }
-            }
-        }
-        catch (Throwable t) {
+         } catch (IOException ioe) {
             if (LOG.isWarnEnabled()) {
-        	LOG.warn("Could not examine class '" + fqn + "' due to a " +
-                     t.getClass().getName() + " with message: " + t.getMessage());
+               LOG.warn("could not read entries", ioe);
             }
-        }
-    }
+         }
+      }
+   }
+
+   /**
+    * Finds matches in a physical directory on a filesystem.  Examines all
+    * files within a directory - if the File object is not a directory, and ends with <i>.class</i>
+    * the file is loaded and tested to see if it is acceptable according to the Test.  Operates
+    * recursively to find classes within a folder structure matching the package structure.
+    *
+    * @param test a Test used to filter the classes that are discovered
+    * @param parent the package name up to this directory in the package hierarchy.  E.g. if
+    *        /classes is in the classpath and we wish to examine files in /classes/org/apache then
+    *        the values of <i>parent</i> would be <i>org/apache</i>
+    * @param location a File object representing a directory
+    */
+   private void loadImplementationsInDirectory(Test test, String parent, File location) {
+      File[] files = location.listFiles();
+      StringBuilder builder = null;
+      for (File file : files) {
+         builder = new StringBuilder(100);
+         builder.append(parent).append("/").append(file.getName());
+         String packageOrClass = (parent == null ? file.getName() : builder.toString());
+         if (file.isDirectory()) {
+            loadImplementationsInDirectory(test, packageOrClass, file);
+         } else if (isTestApplicable(test, file.getName())) {
+            addIfMatching(test, packageOrClass);
+         }
+      }
+   }
+
+   private boolean isTestApplicable(Test test, String path) {
+      return test.doesMatchResource() || path.endsWith(".class") && test.doesMatchClass();
+   }
+
+   /**
+    * Finds matching classes within a jar files that contains a folder structure
+    * matching the package structure.  If the File is not a JarFile or does not exist a warning
+    * will be logged, but no error will be raised.
+    *
+    * @param test a Test used to filter the classes that are discovered
+    * @param parent the parent package under which classes must be in order to be considered
+    * @param jarfile the jar file to be examined for classes
+    */
+   private void loadImplementationsInJar(Test test, String parent, File jarfile) {
+      try {
+         JarEntry entry;
+         JarInputStream jarStream = new JarInputStream(new FileInputStream(jarfile));
+         while ((entry = jarStream.getNextJarEntry()) != null) {
+            String name = entry.getName();
+            if (!entry.isDirectory() && name.startsWith(parent) && isTestApplicable(test, name)) {
+               addIfMatching(test, name);
+            }
+         }
+      } catch (IOException ioe) {
+         LOG.error("Could not search jar file '" + jarfile + "' for classes matching criteria: " + test
+               + " due to an IOException", ioe);
+      }
+   }
+
+   /**
+    * Add the class designated by the fully qualified class name provided to the set of
+    * resolved classes if and only if it is approved by the Test supplied.
+    *
+    * @param test the test used to determine if the class matches
+    * @param fqn the fully qualified name of a class
+    */
+   protected void addIfMatching(Test test, String fqn) {
+      try {
+         ClassLoader loader = getClassLoader();
+         if (test.doesMatchClass()) {
+            String externalName = fqn.substring(0, fqn.indexOf('.')).replace('/', '.');
+            if (LOG.isDebugEnabled()) {
+               LOG.debug("Checking to see if class " + externalName + " matches criteria [" + test + "]");
+            }
+            Class type = loader.loadClass(externalName);
+            if (test.matches(type)) {
+               classMatches.add((Class<T>) type);
+            }
+         }
+         if (test.doesMatchResource()) {
+            URL url = loader.getResource(fqn);
+            if (url == null) {
+               url = loader.getResource(fqn.substring(1));
+            }
+            if (url != null && test.matches(url)) {
+               resourceMatches.add(url);
+            }
+         }
+      } catch (Throwable t) {
+         if (LOG.isWarnEnabled()) {
+            LOG.warn("Could not examine class '" + fqn + "' due to a " + t.getClass().getName() + " with message: "
+                  + t.getMessage());
+         }
+      }
+   }
 }

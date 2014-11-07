@@ -13,10 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.opensymphony.xwork2.validator.validators;
 
 import com.opensymphony.xwork2.validator.ValidationException;
 import com.opensymphony.xwork2.util.URLUtil;
+import java.io.Serializable;
 
 /**
  * <!-- START SNIPPET: javadoc -->
@@ -60,20 +62,18 @@ import com.opensymphony.xwork2.util.URLUtil;
  * @author $Author: lukaszlenart $
  * @version $Date: 2013-01-03 17:20:11 +0100 (Thu, 03 Jan 2013) $ $Revision: 1428445 $
  */
-public class URLValidator extends FieldValidatorSupport {
+public class URLValidator extends FieldValidatorSupport implements Serializable {
 
-    public void validate(Object object) throws ValidationException {
-        String fieldName = getFieldName();
-        Object value = this.getFieldValue(fieldName, object);
-
-        // if there is no value - don't do comparison
-        // if a value is required, a required validator should be added to the field
-        if (value == null || value.toString().length() == 0) {
-            return;
-        }
-
-        if (!(value.getClass().equals(String.class)) || !URLUtil.verifyUrl((String) value)) {
-            addFieldError(fieldName, object);
-        }
-    }
+   public void validate(Object object) throws ValidationException {
+      String fieldName = getFieldName();
+      Object value = this.getFieldValue(fieldName, object);
+      // if there is no value - don't do comparison
+      // if a value is required, a required validator should be added to the field
+      if (value == null || value.toString().length() == 0) {
+         return;
+      }
+      if (!(value.getClass().equals(String.class)) || !URLUtil.verifyUrl((String) value)) {
+         addFieldError(fieldName, object);
+      }
+   }
 }

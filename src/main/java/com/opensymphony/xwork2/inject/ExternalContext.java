@@ -1,23 +1,8 @@
-/**
- * Copyright (C) 2006 Google Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package com.opensymphony.xwork2.inject;
 
 import java.lang.reflect.Member;
 import java.util.LinkedHashMap;
+import java.io.Serializable;
 
 /**
  * An immutable snapshot of the current context which is safe to
@@ -25,50 +10,54 @@ import java.util.LinkedHashMap;
  *
  * @author crazybob@google.com (Bob Lee)
  */
-class ExternalContext<T> implements Context {
+class ExternalContext<T> implements Context, Serializable {
 
-  final Member member;
-  final Key<T> key;
-  final ContainerImpl container;
+   final Member member;
 
-  public ExternalContext(Member member, Key<T> key, ContainerImpl container) {
-    this.member = member;
-    this.key = key;
-    this.container = container;
-  }
+   final Key<T> key;
 
-  public Class<T> getType() {
-    return key.getType();
-  }
+   final ContainerImpl container;
 
-  public Scope.Strategy getScopeStrategy() {
-    return (Scope.Strategy) container.localScopeStrategy.get();
-  }
+   public ExternalContext(Member member, Key<T> key, ContainerImpl container) {
+      this.member = member;
+      this.key = key;
+      this.container = container;
+   }
 
-  public Container getContainer() {
-    return container;
-  }
+   public Class<T> getType() {
+      return key.getType();
+   }
 
-  public Member getMember() {
-    return member;
-  }
+   public Scope.Strategy getScopeStrategy() {
+      return (Scope.Strategy) container.localScopeStrategy.get();
+   }
 
-  public String getName() {
-    return key.getName();
-  }
+   public Container getContainer() {
+      return container;
+   }
 
-  @Override
-  public String toString() {
-    return "Context" + new LinkedHashMap<String, Object>() {{
-      put("member", member);
-      put("type", getType());
-      put("name", getName());
-      put("container", container);
-    }}.toString();
-  }
+   public Member getMember() {
+      return member;
+   }
 
-  static <T> ExternalContext<T> newInstance(Member member, Key<T> key,
-      ContainerImpl container) {
-    return new ExternalContext<T>(member, key, container);
-  }
+   public String getName() {
+      return key.getName();
+   }
+
+   @Override
+   public String toString() {
+      return "Context" + new LinkedHashMap<String, Object>() {
+
+         {
+            put("member", member);
+            put("type", getType());
+            put("name", getName());
+            put("container", container);
+         }
+      }.toString();
+   }
+
+   static <T> ExternalContext<T> newInstance(Member member, Key<T> key, ContainerImpl container) {
+      return new ExternalContext<T>(member, key, container);
+   }
 }

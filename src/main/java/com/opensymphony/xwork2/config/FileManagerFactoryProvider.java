@@ -4,30 +4,30 @@ import com.opensymphony.xwork2.FileManagerFactory;
 import com.opensymphony.xwork2.inject.ContainerBuilder;
 import com.opensymphony.xwork2.inject.Scope;
 import com.opensymphony.xwork2.util.location.LocatableProperties;
+import java.io.Serializable;
 
 /**
  * Allows to specify custom {@link FileManagerFactory}
  */
-public class FileManagerFactoryProvider implements ContainerProvider {
+public class FileManagerFactoryProvider implements ContainerProvider, Serializable {
 
-    private Class<? extends FileManagerFactory> factoryClass;
+   private Class<? extends FileManagerFactory> factoryClass;
 
-    public FileManagerFactoryProvider(Class<? extends FileManagerFactory> factoryClass) {
-        this.factoryClass = factoryClass;
-    }
+   public FileManagerFactoryProvider(Class<? extends FileManagerFactory> factoryClass) {
+      this.factoryClass = factoryClass;
+   }
 
-    public void destroy() {
-    }
+   public void destroy() {
+   }
 
-    public void init(Configuration configuration) throws ConfigurationException {
-    }
+   public void init(Configuration configuration) throws ConfigurationException {
+   }
 
-    public boolean needsReload() {
-        return false;
-    }
+   public boolean needsReload() {
+      return false;
+   }
 
-    public void register(ContainerBuilder builder, LocatableProperties props) throws ConfigurationException {
-        builder.factory(FileManagerFactory.class, factoryClass.getSimpleName(), factoryClass, Scope.SINGLETON);
-    }
-
+   public void register(ContainerBuilder builder, LocatableProperties props) throws ConfigurationException {
+      builder.factory(FileManagerFactory.class, factoryClass.getSimpleName(), factoryClass, Scope.SINGLETON);
+   }
 }

@@ -16,11 +16,14 @@
 
 package com.opensymphony.xwork2;
 
+import java.io.Serializable;
+
 /**
  * Mock for an {@link ActionInvocation}.
  *
  * @author plightbo
  * @deprecated Please use @see com.opensymphony.xwork2.mock.MockActionInvocation instead
  */
-@Deprecated public class MockActionInvocation extends com.opensymphony.xwork2.mock.MockActionInvocation {
+@Deprecated
+public class MockActionInvocation extends com.opensymphony.xwork2.mock.MockActionInvocation implements Serializable {
 }

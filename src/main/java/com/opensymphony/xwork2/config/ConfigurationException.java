@@ -13,75 +13,76 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.opensymphony.xwork2.config;
 
 import com.opensymphony.xwork2.XWorkException;
-
+import java.io.Serializable;
 
 /**
  * ConfigurationException
  *
  * @author Jason Carreira
  */
-public class ConfigurationException extends XWorkException {
+public class ConfigurationException extends XWorkException implements Serializable {
 
-    /**
-     * Constructs a <code>ConfigurationException</code> with no detail message.
-     */
-    public ConfigurationException() {
-    }
+   /**
+    * Constructs a <code>ConfigurationException</code> with no detail message.
+    */
+   public ConfigurationException() {
+   }
 
-    /**
-     * Constructs a <code>ConfigurationException</code> with the specified
-     * detail message.
-     *
-     * @param s the detail message.
-     */
-    public ConfigurationException(String s) {
-        super(s);
-    }
-    
-    /**
-     * Constructs a <code>ConfigurationException</code> with the specified
-     * detail message.
-     *
-     * @param s the detail message.
-     */
-    public ConfigurationException(String s, Object target) {
-        super(s, target);
-    }
+   /**
+    * Constructs a <code>ConfigurationException</code> with the specified
+    * detail message.
+    *
+    * @param s the detail message.
+    */
+   public ConfigurationException(String s) {
+      super(s);
+   }
 
-    /**
-     * Constructs a <code>ConfigurationException</code> with no detail message.
-     */
-    public ConfigurationException(Throwable cause) {
-        super(cause);
-    }
-    
-    /**
-     * Constructs a <code>ConfigurationException</code> with no detail message.
-     */
-    public ConfigurationException(Throwable cause, Object target) {
-        super(cause, target);
-    }
+   /**
+    * Constructs a <code>ConfigurationException</code> with the specified
+    * detail message.
+    *
+    * @param s the detail message.
+    */
+   public ConfigurationException(String s, Object target) {
+      super(s, target);
+   }
 
-    /**
-     * Constructs a <code>ConfigurationException</code> with the specified
-     * detail message.
-     *
-     * @param s the detail message.
-     */
-    public ConfigurationException(String s, Throwable cause) {
-        super(s, cause);
-    }
-    
-    /**
-     * Constructs a <code>ConfigurationException</code> with the specified
-     * detail message.
-     *
-     * @param s the detail message.
-     */
-    public ConfigurationException(String s, Throwable cause, Object target) {
-        super(s, cause, target);
-    }
+   /**
+    * Constructs a <code>ConfigurationException</code> with no detail message.
+    */
+   public ConfigurationException(Throwable cause) {
+      super(cause);
+   }
+
+   /**
+    * Constructs a <code>ConfigurationException</code> with no detail message.
+    */
+   public ConfigurationException(Throwable cause, Object target) {
+      super(cause, target);
+   }
+
+   /**
+    * Constructs a <code>ConfigurationException</code> with the specified
+    * detail message.
+    *
+    * @param s the detail message.
+    */
+   public ConfigurationException(String s, Throwable cause) {
+      super(s, cause);
+   }
+
+   /**
+    * Constructs a <code>ConfigurationException</code> with the specified
+    * detail message.
+    *
+    * @param s the detail message.
+    */
+   public ConfigurationException(String s, Throwable cause, Object target) {
+      super(s, cause, target);
+   }
 }

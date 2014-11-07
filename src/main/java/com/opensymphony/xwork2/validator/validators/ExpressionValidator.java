@@ -13,9 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.opensymphony.xwork2.validator.validators;
 
 import com.opensymphony.xwork2.validator.ValidationException;
+import java.io.Serializable;
 
 /**
  * <!-- START SNIPPET: javadoc -->
@@ -43,41 +45,38 @@ import com.opensymphony.xwork2.validator.ValidationException;
  *
  * @author Jason Carreira
  */
-public class ExpressionValidator extends ValidatorSupport {
+public class ExpressionValidator extends ValidatorSupport implements Serializable {
 
-    private String expression;
+   private String expression;
 
-    public void setExpression(String expression) {
-        this.expression = expression;
-    }
+   public void setExpression(String expression) {
+      this.expression = expression;
+   }
 
-    public String getExpression() {
-        return expression;
-    }
+   public String getExpression() {
+      return expression;
+   }
 
-    public void validate(Object object) throws ValidationException {
-        Boolean answer = Boolean.FALSE;
-        Object obj = null;
-
-        try {
-            obj = getFieldValue(expression, object);
-        } catch (ValidationException e) {
-            throw e;
-        } catch (Exception e) {
-            // let this pass, but it will be logged right below
-        }
-
-        if ((obj != null) && (obj instanceof Boolean)) {
-            answer = (Boolean) obj;
-        } else {
-            log.warn("Got result of [#0] when trying to get Boolean.", obj);
-        }
-
-        if (!answer) {
-            if (log.isDebugEnabled()) {
-                log.debug("Validation failed on expression [#0] with validated object [#1]", expression, object);
-            }
-            addActionError(object);
-        }
-    }
+   public void validate(Object object) throws ValidationException {
+      Boolean answer = Boolean.FALSE;
+      Object obj = null;
+      try {
+         obj = getFieldValue(expression, object);
+      } catch (ValidationException e) {
+         throw e;
+      } catch (Exception e) {
+         // let this pass, but it will be logged right below
+      }
+      if ((obj != null) && (obj instanceof Boolean)) {
+         answer = (Boolean) obj;
+      } else {
+         log.warn("Got result of [#0] when trying to get Boolean.", obj);
+      }
+      if (!answer) {
+         if (log.isDebugEnabled()) {
+            log.debug("Validation failed on expression [#0] with validated object [#1]", expression, object);
+         }
+         addActionError(object);
+      }
+   }
 }

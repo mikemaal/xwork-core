@@ -19,9 +19,9 @@ package com.opensymphony.xwork2.mock;
 import com.opensymphony.xwork2.*;
 import com.opensymphony.xwork2.interceptor.PreResultListener;
 import com.opensymphony.xwork2.util.ValueStack;
-
 import java.util.ArrayList;
 import java.util.List;
+import java.io.Serializable;
 
 /**
  * Mock for an {@link ActionInvocation}.
@@ -31,103 +31,108 @@ import java.util.List;
  * @author tm_jee
  * @version $Id: MockActionInvocation.java 1483773 2013-05-17 12:38:42Z lukaszlenart $
  */
-public class MockActionInvocation implements ActionInvocation {
+public class MockActionInvocation implements ActionInvocation, Serializable {
 
-    private Object action;
-    private ActionContext invocationContext;
-    private ActionEventListener actionEventListener;
-    private ActionProxy proxy;
-    private Result result;
-    private String resultCode;
-    private ValueStack stack;
-    
-    private List<PreResultListener> preResultListeners = new ArrayList<PreResultListener>();
+   private Object action;
 
-    public Object getAction() {
-        return action;
-    }
+   private ActionContext invocationContext;
 
-    public void setAction(Object action) {
-        this.action = action;
-    }
+   private ActionEventListener actionEventListener;
 
-    public ActionContext getInvocationContext() {
-        return invocationContext;
-    }
+   private ActionProxy proxy;
 
-    public void setInvocationContext(ActionContext invocationContext) {
-        this.invocationContext = invocationContext;
-    }
+   private Result result;
 
-    public ActionProxy getProxy() {
-        return proxy;
-    }
+   private String resultCode;
 
-    public void setProxy(ActionProxy proxy) {
-        this.proxy = proxy;
-    }
+   private ValueStack stack;
 
-    public Result getResult() {
-        return result;
-    }
+   private List<PreResultListener> preResultListeners = new ArrayList<PreResultListener>();
 
-    public void setResult(Result result) {
-        this.result = result;
-    }
+   public Object getAction() {
+      return action;
+   }
 
-    public String getResultCode() {
-        return resultCode;
-    }
+   public void setAction(Object action) {
+      this.action = action;
+   }
 
-    public void setResultCode(String resultCode) {
-        this.resultCode = resultCode;
-    }
+   public ActionContext getInvocationContext() {
+      return invocationContext;
+   }
 
-    public ValueStack getStack() {
-        return stack;
-    }
+   public void setInvocationContext(ActionContext invocationContext) {
+      this.invocationContext = invocationContext;
+   }
 
-    public void setStack(ValueStack stack) {
-        this.stack = stack;
-    }
+   public ActionProxy getProxy() {
+      return proxy;
+   }
 
-    public boolean isExecuted() {
-        return false;
-    }
+   public void setProxy(ActionProxy proxy) {
+      this.proxy = proxy;
+   }
 
-    public void addPreResultListener(PreResultListener listener) {
-    	preResultListeners.add(listener);
-    }
+   public Result getResult() {
+      return result;
+   }
 
-    public String invoke() throws Exception {
-        for (Object preResultListener : preResultListeners) {
-            PreResultListener listener = (PreResultListener) preResultListener;
-            listener.beforeResult(this, resultCode);
-        }
-        return resultCode;
-    }
+   public void setResult(Result result) {
+      this.result = result;
+   }
 
-    public String invokeActionOnly() throws Exception {
-        return resultCode;
-    }
+   public String getResultCode() {
+      return resultCode;
+   }
 
-    public void setActionEventListener(ActionEventListener listener) {
-        this.actionEventListener = listener;
-    }
-    
-    public ActionEventListener getActionEventListener() {
-        return this.actionEventListener;
-    }
+   public void setResultCode(String resultCode) {
+      this.resultCode = resultCode;
+   }
 
-    public void init(ActionProxy proxy) {
-    }
+   public ValueStack getStack() {
+      return stack;
+   }
 
-    public ActionInvocation serialize() {
-        return this;
-    }
+   public void setStack(ValueStack stack) {
+      this.stack = stack;
+   }
 
-    public ActionInvocation deserialize(ActionContext actionContext) {
-        return this;
-    }
+   public boolean isExecuted() {
+      return false;
+   }
 
+   public void addPreResultListener(PreResultListener listener) {
+      preResultListeners.add(listener);
+   }
+
+   public String invoke() throws Exception {
+      for (Object preResultListener : preResultListeners) {
+         PreResultListener listener = (PreResultListener) preResultListener;
+         listener.beforeResult(this, resultCode);
+      }
+      return resultCode;
+   }
+
+   public String invokeActionOnly() throws Exception {
+      return resultCode;
+   }
+
+   public void setActionEventListener(ActionEventListener listener) {
+      this.actionEventListener = listener;
+   }
+
+   public ActionEventListener getActionEventListener() {
+      return this.actionEventListener;
+   }
+
+   public void init(ActionProxy proxy) {
+   }
+
+   public ActionInvocation serialize() {
+      return this;
+   }
+
+   public ActionInvocation deserialize(ActionContext actionContext) {
+      return this;
+   }
 }

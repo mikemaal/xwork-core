@@ -7,48 +7,47 @@ import com.opensymphony.xwork2.inject.Inject;
 import com.opensymphony.xwork2.util.reflection.ReflectionException;
 import com.opensymphony.xwork2.util.reflection.ReflectionExceptionHandler;
 import com.opensymphony.xwork2.util.reflection.ReflectionProvider;
-
 import java.util.Map;
+import java.io.Serializable;
 
 /**
  * Default implementation
  */
-public class DefaultResultFactory implements ResultFactory {
+public class DefaultResultFactory implements ResultFactory, Serializable {
 
-    private ObjectFactory objectFactory;
-    private ReflectionProvider reflectionProvider;
+   private ObjectFactory objectFactory;
 
-    @Inject
-    public void setObjectFactory(ObjectFactory objectFactory) {
-        this.objectFactory = objectFactory;
-    }
+   private ReflectionProvider reflectionProvider;
 
-    @Inject
-    public void setReflectionProvider(ReflectionProvider reflectionProvider) {
-        this.reflectionProvider = reflectionProvider;
-    }
+   @Inject
+   public void setObjectFactory(ObjectFactory objectFactory) {
+      this.objectFactory = objectFactory;
+   }
 
-    public Result buildResult(ResultConfig resultConfig, Map<String, Object> extraContext) throws Exception {
-        String resultClassName = resultConfig.getClassName();
-        Result result = null;
+   @Inject
+   public void setReflectionProvider(ReflectionProvider reflectionProvider) {
+      this.reflectionProvider = reflectionProvider;
+   }
 
-        if (resultClassName != null) {
-            result = (Result) objectFactory.buildBean(resultClassName, extraContext);
-            Map<String, String> params = resultConfig.getParams();
-            if (params != null) {
-                for (Map.Entry<String, String> paramEntry : params.entrySet()) {
-                    try {
-                        reflectionProvider.setProperty(paramEntry.getKey(), paramEntry.getValue(), result, extraContext, true);
-                    } catch (ReflectionException ex) {
-                        if (result instanceof ReflectionExceptionHandler) {
-                            ((ReflectionExceptionHandler) result).handle(ex);
-                        }
-                    }
-                }
+   public Result buildResult(ResultConfig resultConfig, Map<String, Object> extraContext) throws Exception {
+      String resultClassName = resultConfig.getClassName();
+      Result result = null;
+      if (resultClassName != null) {
+         result = (Result) objectFactory.buildBean(resultClassName, extraContext);
+         Map<String, String> params = resultConfig.getParams();
+         if (params != null) {
+            for (Map.Entry<String, String> paramEntry : params.entrySet()) {
+               try {
+                  reflectionProvider
+                        .setProperty(paramEntry.getKey(), paramEntry.getValue(), result, extraContext, true);
+               } catch (ReflectionException ex) {
+                  if (result instanceof ReflectionExceptionHandler) {
+                     ((ReflectionExceptionHandler) result).handle(ex);
+                  }
+               }
             }
-        }
-
-        return result;
-    }
-
+         }
+      }
+      return result;
+   }
 }

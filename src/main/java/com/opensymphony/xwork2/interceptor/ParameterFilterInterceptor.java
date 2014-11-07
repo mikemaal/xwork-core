@@ -13,17 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.opensymphony.xwork2.interceptor;
 
 import com.opensymphony.xwork2.ActionInvocation;
 import com.opensymphony.xwork2.util.TextParseUtil;
 import com.opensymphony.xwork2.util.logging.Logger;
 import com.opensymphony.xwork2.util.logging.LoggerFactory;
-
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.TreeMap;
+import java.io.Serializable;
 
 /**
  * <!-- START SNIPPET: description -->
@@ -93,145 +94,137 @@ import java.util.TreeMap;
  * 
  * @author Gabe
  */
-public class ParameterFilterInterceptor extends AbstractInterceptor {
+public class ParameterFilterInterceptor extends AbstractInterceptor implements Serializable {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ParameterFilterInterceptor.class);
+   private static final Logger LOG = LoggerFactory.getLogger(ParameterFilterInterceptor.class);
 
-    private Collection<String> allowed;
-    private Collection<String> blocked;
-    private Map<String, Boolean> includesExcludesMap;
-    private boolean defaultBlock = false;
+   private Collection<String> allowed;
 
-    @Override
-    public String intercept(ActionInvocation invocation) throws Exception {
+   private Collection<String> blocked;
 
-        Map<String, Object> parameters = invocation.getInvocationContext().getParameters();
-        HashSet<String> paramsToRemove = new HashSet<String>();
+   private Map<String, Boolean> includesExcludesMap;
 
-        Map<String, Boolean> includesExcludesMap = getIncludesExcludesMap();
+   private boolean defaultBlock = false;
 
-        for (String param : parameters.keySet()) {
-            boolean currentAllowed = !isDefaultBlock();
-
-            for (String currRule : includesExcludesMap.keySet()) {
-                if (param.startsWith(currRule)
-                        && (param.length() == currRule.length()
-                        || isPropSeperator(param.charAt(currRule.length())))) {
-                    currentAllowed = includesExcludesMap.get(currRule).booleanValue();
-                }
+   @Override
+   public String intercept(ActionInvocation invocation) throws Exception {
+      Map<String, Object> parameters = invocation.getInvocationContext().getParameters();
+      HashSet<String> paramsToRemove = new HashSet<String>();
+      Map<String, Boolean> includesExcludesMap = getIncludesExcludesMap();
+      for (String param : parameters.keySet()) {
+         boolean currentAllowed = !isDefaultBlock();
+         for (String currRule : includesExcludesMap.keySet()) {
+            if (param.startsWith(currRule)
+                  && (param.length() == currRule.length() || isPropSeperator(param.charAt(currRule.length())))) {
+               currentAllowed = includesExcludesMap.get(currRule).booleanValue();
             }
-            if (!currentAllowed) {
-                paramsToRemove.add(param);
+         }
+         if (!currentAllowed) {
+            paramsToRemove.add(param);
+         }
+      }
+      if (LOG.isDebugEnabled()) {
+         LOG.debug("Params to remove: " + paramsToRemove);
+      }
+      for (Object aParamsToRemove : paramsToRemove) {
+         parameters.remove(aParamsToRemove);
+      }
+      return invocation.invoke();
+   }
+
+   /**
+    * Tests if the given char is a property seperator char <code>.([</code>.
+    *
+    * @param c the char
+    * @return <tt>true</tt>, if char is property separator, <tt>false</tt> otherwise.
+    */
+   private static boolean isPropSeperator(char c) {
+      return c == '.' || c == '(' || c == '[';
+   }
+
+   private Map<String, Boolean> getIncludesExcludesMap() {
+      if (this.includesExcludesMap == null) {
+         this.includesExcludesMap = new TreeMap<String, Boolean>();
+         if (getAllowedCollection() != null) {
+            for (String e : getAllowedCollection()) {
+               this.includesExcludesMap.put(e, Boolean.TRUE);
             }
-        }
-
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Params to remove: " + paramsToRemove);
-        }
-
-        for (Object aParamsToRemove : paramsToRemove) {
-            parameters.remove(aParamsToRemove);
-        }
-
-        return invocation.invoke();
-    }
-
-    /**
-     * Tests if the given char is a property seperator char <code>.([</code>.
-     *
-     * @param c the char
-     * @return <tt>true</tt>, if char is property separator, <tt>false</tt> otherwise.
-     */
-    private static boolean isPropSeperator(char c) {
-        return c == '.' || c == '(' || c == '[';
-    }
-
-    private Map<String, Boolean> getIncludesExcludesMap() {
-        if (this.includesExcludesMap == null) {
-            this.includesExcludesMap = new TreeMap<String, Boolean>();
-
-            if (getAllowedCollection() != null) {
-                for (String e : getAllowedCollection()) {
-                    this.includesExcludesMap.put(e, Boolean.TRUE);
-                }
+         }
+         if (getBlockedCollection() != null) {
+            for (String b : getBlockedCollection()) {
+               this.includesExcludesMap.put(b, Boolean.FALSE);
             }
-            if (getBlockedCollection() != null) {
-                for (String b : getBlockedCollection()) {
-                    this.includesExcludesMap.put(b, Boolean.FALSE);
-                }
-            }
-        }
+         }
+      }
+      return this.includesExcludesMap;
+   }
 
-        return this.includesExcludesMap;
-    }
+   /**
+    * @return Returns the defaultBlock.
+    */
+   public boolean isDefaultBlock() {
+      return defaultBlock;
+   }
 
-    /**
-     * @return Returns the defaultBlock.
-     */
-    public boolean isDefaultBlock() {
-        return defaultBlock;
-    }
+   /**
+    * @param defaultExclude The defaultExclude to set.
+    */
+   public void setDefaultBlock(boolean defaultExclude) {
+      this.defaultBlock = defaultExclude;
+   }
 
-    /**
-     * @param defaultExclude The defaultExclude to set.
-     */
-    public void setDefaultBlock(boolean defaultExclude) {
-        this.defaultBlock = defaultExclude;
-    }
+   /**
+    * @return Returns the blocked.
+    */
+   public Collection<String> getBlockedCollection() {
+      return blocked;
+   }
 
-    /**
-     * @return Returns the blocked.
-     */
-    public Collection<String> getBlockedCollection() {
-        return blocked;
-    }
+   /**
+    * @param blocked The blocked to set.
+    */
+   public void setBlockedCollection(Collection<String> blocked) {
+      this.blocked = blocked;
+   }
 
-    /**
-     * @param blocked The blocked to set.
-     */
-    public void setBlockedCollection(Collection<String> blocked) {
-        this.blocked = blocked;
-    }
+   /**
+    * @param blocked The blocked paramters as comma separated String.
+    */
+   public void setBlocked(String blocked) {
+      setBlockedCollection(asCollection(blocked));
+   }
 
-    /**
-     * @param blocked The blocked paramters as comma separated String.
-     */
-    public void setBlocked(String blocked) {
-        setBlockedCollection(asCollection(blocked));
-    }
+   /**
+    * @return Returns the allowed.
+    */
+   public Collection<String> getAllowedCollection() {
+      return allowed;
+   }
 
-    /**
-     * @return Returns the allowed.
-     */
-    public Collection<String> getAllowedCollection() {
-        return allowed;
-    }
+   /**
+    * @param allowed The allowed to set.
+    */
+   public void setAllowedCollection(Collection<String> allowed) {
+      this.allowed = allowed;
+   }
 
-    /**
-     * @param allowed The allowed to set.
-     */
-    public void setAllowedCollection(Collection<String> allowed) {
-        this.allowed = allowed;
-    }
+   /**
+    * @param allowed The allowed paramters as comma separated String.
+    */
+   public void setAllowed(String allowed) {
+      setAllowedCollection(asCollection(allowed));
+   }
 
-    /**
-     * @param allowed The allowed paramters as comma separated String.
-     */
-    public void setAllowed(String allowed) {
-        setAllowedCollection(asCollection(allowed));
-    }
-
-    /**
-     * Return a collection from the comma delimited String.
-     *
-     * @param commaDelim the comma delimited String.
-     * @return A collection from the comma delimited String. Returns <tt>null</tt> if the string is empty.
-     */
-    private Collection<String> asCollection(String commaDelim) {
-        if (commaDelim == null || commaDelim.trim().length() == 0) {
-            return null;
-        }
-        return TextParseUtil.commaDelimitedStringToSet(commaDelim);
-    }
-
+   /**
+    * Return a collection from the comma delimited String.
+    *
+    * @param commaDelim the comma delimited String.
+    * @return A collection from the comma delimited String. Returns <tt>null</tt> if the string is empty.
+    */
+   private Collection<String> asCollection(String commaDelim) {
+      if (commaDelim == null || commaDelim.trim().length() == 0) {
+         return null;
+      }
+      return TextParseUtil.commaDelimitedStringToSet(commaDelim);
+   }
 }

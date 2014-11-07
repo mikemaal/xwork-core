@@ -13,13 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.opensymphony.xwork2.interceptor;
 
 import com.opensymphony.xwork2.ActionInvocation;
 import com.opensymphony.xwork2.ModelDriven;
 import com.opensymphony.xwork2.util.CompoundRoot;
 import com.opensymphony.xwork2.util.ValueStack;
-
+import java.io.Serializable;
 
 /**
  * <!-- START SNIPPET: description -->
@@ -74,71 +75,67 @@ import com.opensymphony.xwork2.util.ValueStack;
  * @author tm_jee
  * @version $Date: 2013-07-12 09:17:39 +0200 (Fri, 12 Jul 2013) $ $Id: ModelDrivenInterceptor.java 1502452 2013-07-12 07:17:39Z lukaszlenart $
  */
-public class ModelDrivenInterceptor extends AbstractInterceptor {
+public class ModelDrivenInterceptor extends AbstractInterceptor implements Serializable {
 
-    protected boolean refreshModelBeforeResult = false;
+   protected boolean refreshModelBeforeResult = false;
 
-    public void setRefreshModelBeforeResult(boolean val) {
-        this.refreshModelBeforeResult = val;
-    }
+   public void setRefreshModelBeforeResult(boolean val) {
+      this.refreshModelBeforeResult = val;
+   }
 
-    @Override
-    public String intercept(ActionInvocation invocation) throws Exception {
-        Object action = invocation.getAction();
+   @Override
+   public String intercept(ActionInvocation invocation) throws Exception {
+      Object action = invocation.getAction();
+      if (action instanceof ModelDriven) {
+         ModelDriven modelDriven = (ModelDriven) action;
+         ValueStack stack = invocation.getStack();
+         Object model = modelDriven.getModel();
+         if (model != null) {
+            stack.push(model);
+         }
+         if (refreshModelBeforeResult) {
+            invocation.addPreResultListener(new RefreshModelBeforeResult(modelDriven, model));
+         }
+      }
+      return invocation.invoke();
+   }
 
-        if (action instanceof ModelDriven) {
-            ModelDriven modelDriven = (ModelDriven) action;
-            ValueStack stack = invocation.getStack();
-            Object model = modelDriven.getModel();
-            if (model !=  null) {
-            	stack.push(model);
+   /**
+    * Refreshes the model instance on the value stack, if it has changed
+    */
+   protected static class RefreshModelBeforeResult implements PreResultListener {
+
+      private Object originalModel = null;
+
+      protected ModelDriven action;
+
+      public RefreshModelBeforeResult(ModelDriven action, Object model) {
+         this.originalModel = model;
+         this.action = action;
+      }
+
+      public void beforeResult(ActionInvocation invocation, String resultCode) {
+         ValueStack stack = invocation.getStack();
+         CompoundRoot root = stack.getRoot();
+         boolean needsRefresh = true;
+         Object newModel = action.getModel();
+         // Check to see if the new model instance is already on the stack
+         for (Object item : root) {
+            if (item.equals(newModel)) {
+               needsRefresh = false;
+               break;
             }
-            if (refreshModelBeforeResult) {
-                invocation.addPreResultListener(new RefreshModelBeforeResult(modelDriven, model));
+         }
+         // Add the new model on the stack
+         if (needsRefresh) {
+            // Clear off the old model instance
+            if (originalModel != null) {
+               root.remove(originalModel);
             }
-        }
-        return invocation.invoke();
-    }
-
-    /**
-     * Refreshes the model instance on the value stack, if it has changed
-     */
-    protected static class RefreshModelBeforeResult implements PreResultListener {
-        private Object originalModel = null;
-        protected ModelDriven action;
-
-
-        public RefreshModelBeforeResult(ModelDriven action, Object model) {
-            this.originalModel = model;
-            this.action = action;
-        }
-
-        public void beforeResult(ActionInvocation invocation, String resultCode) {
-            ValueStack stack = invocation.getStack();
-            CompoundRoot root = stack.getRoot();
-
-            boolean needsRefresh = true;
-            Object newModel = action.getModel();
-
-            // Check to see if the new model instance is already on the stack
-            for (Object item : root) {
-                if (item.equals(newModel)) {
-                    needsRefresh = false;
-                    break;
-                }
+            if (newModel != null) {
+               stack.push(newModel);
             }
-
-            // Add the new model on the stack
-            if (needsRefresh) {
-
-                // Clear off the old model instance
-                if (originalModel != null) {
-                    root.remove(originalModel);
-                }
-                if (newModel != null) {
-                    stack.push(newModel);
-                }
-            }
-        }
-    }
+         }
+      }
+   }
 }

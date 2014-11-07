@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.opensymphony.xwork2.config.impl;
 
 import com.opensymphony.xwork2.XWorkConstants;
@@ -29,100 +30,101 @@ import com.opensymphony.xwork2.inject.Container;
 import com.opensymphony.xwork2.inject.ContainerBuilder;
 import com.opensymphony.xwork2.inject.Scope;
 import com.opensymphony.xwork2.util.location.LocatableProperties;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
+import java.io.Serializable;
 
 /**
  * Simple configuration used for unit testing
  */
-public class MockConfiguration implements Configuration {
+public class MockConfiguration implements Configuration, Serializable {
 
-    private Map<String, PackageConfig> packages = new HashMap<String, PackageConfig>();
-    private Set<String> loadedFiles = new HashSet<String>();
-    private Container container;
-    protected List<UnknownHandlerConfig> unknownHandlerStack;
-    private ContainerBuilder builder;
+   private Map<String, PackageConfig> packages = new HashMap<String, PackageConfig>();
 
-    public MockConfiguration() {
-        builder = new ContainerBuilder();
-    }
+   private Set<String> loadedFiles = new HashSet<String>();
 
-    public void selfRegister() {
-        //this cannot be done in the constructor, as it causes an infinite loop
-        builder.factory(Configuration.class, MockConfiguration.class, Scope.SINGLETON);
-        LocatableProperties props = new LocatableProperties();
-        new XWorkConfigurationProvider().register(builder, props);
-        builder.constant(XWorkConstants.DEV_MODE, "false");
-        builder.constant(XWorkConstants.RELOAD_XML_CONFIGURATION, "true");
-        builder.constant(XWorkConstants.ENABLE_OGNL_EXPRESSION_CACHE, "true");
-        container = builder.create(true);
-    }
+   private Container container;
 
-    public PackageConfig getPackageConfig(String name) {
-        return packages.get(name);
-    }
+   protected List<UnknownHandlerConfig> unknownHandlerStack;
 
-    public Set<String> getPackageConfigNames() {
-        return packages.keySet();
-    }
+   private ContainerBuilder builder;
 
-    public Map<String, PackageConfig> getPackageConfigs() {
-        return packages;
-    }
+   public MockConfiguration() {
+      builder = new ContainerBuilder();
+   }
 
-    public RuntimeConfiguration getRuntimeConfiguration() {
-        throw new UnsupportedOperationException();
-    }
+   public void selfRegister() {
+      //this cannot be done in the constructor, as it causes an infinite loop
+      builder.factory(Configuration.class, MockConfiguration.class, Scope.SINGLETON);
+      LocatableProperties props = new LocatableProperties();
+      new XWorkConfigurationProvider().register(builder, props);
+      builder.constant(XWorkConstants.DEV_MODE, "false");
+      builder.constant(XWorkConstants.RELOAD_XML_CONFIGURATION, "true");
+      builder.constant(XWorkConstants.ENABLE_OGNL_EXPRESSION_CACHE, "true");
+      container = builder.create(true);
+   }
 
-    public void addPackageConfig(String name, PackageConfig packageContext) {
-        packages.put(name, packageContext);
-    }
+   public PackageConfig getPackageConfig(String name) {
+      return packages.get(name);
+   }
 
-    public void buildRuntimeConfiguration() {
-        throw new UnsupportedOperationException();
-    }
+   public Set<String> getPackageConfigNames() {
+      return packages.keySet();
+   }
 
-    public void destroy() {
-        throw new UnsupportedOperationException();
-    }
+   public Map<String, PackageConfig> getPackageConfigs() {
+      return packages;
+   }
 
-    public void rebuildRuntimeConfiguration() {
-        throw new UnsupportedOperationException();
-    }
+   public RuntimeConfiguration getRuntimeConfiguration() {
+      throw new UnsupportedOperationException();
+   }
 
-    public void reload(List<ConfigurationProvider> providers) throws ConfigurationException {
-        throw new UnsupportedOperationException();
-    }
+   public void addPackageConfig(String name, PackageConfig packageContext) {
+      packages.put(name, packageContext);
+   }
 
-    public PackageConfig removePackageConfig(String name) {
-        return packages.remove(name);
-    }
+   public void buildRuntimeConfiguration() {
+      throw new UnsupportedOperationException();
+   }
 
-    public Container getContainer() {
-        return container;
-    }
+   public void destroy() {
+      throw new UnsupportedOperationException();
+   }
 
-    public Set<String> getLoadedFileNames() {
-        return loadedFiles;
-    }
+   public void rebuildRuntimeConfiguration() {
+      throw new UnsupportedOperationException();
+   }
 
-    public List<PackageProvider> reloadContainer(
-            List<ContainerProvider> containerProviders)
-            throws ConfigurationException {
-        throw new UnsupportedOperationException();
-    }
+   public void reload(List<ConfigurationProvider> providers) throws ConfigurationException {
+      throw new UnsupportedOperationException();
+   }
 
-    public List<UnknownHandlerConfig> getUnknownHandlerStack() {
-        return unknownHandlerStack;
-    }
+   public PackageConfig removePackageConfig(String name) {
+      return packages.remove(name);
+   }
 
-    public void setUnknownHandlerStack(List<UnknownHandlerConfig> unknownHandlerStack) {
-        this.unknownHandlerStack = unknownHandlerStack;
-    }
+   public Container getContainer() {
+      return container;
+   }
 
+   public Set<String> getLoadedFileNames() {
+      return loadedFiles;
+   }
+
+   public List<PackageProvider> reloadContainer(List<ContainerProvider> containerProviders)
+         throws ConfigurationException {
+      throw new UnsupportedOperationException();
+   }
+
+   public List<UnknownHandlerConfig> getUnknownHandlerStack() {
+      return unknownHandlerStack;
+   }
+
+   public void setUnknownHandlerStack(List<UnknownHandlerConfig> unknownHandlerStack) {
+      this.unknownHandlerStack = unknownHandlerStack;
+   }
 }

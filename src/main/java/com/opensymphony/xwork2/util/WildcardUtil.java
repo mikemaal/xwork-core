@@ -13,56 +13,47 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.opensymphony.xwork2.util;
 
 import java.util.regex.Pattern;
+import java.io.Serializable;
 
 /**
  * Helper class to convert wildcard expression to regular expression
  */
-public class WildcardUtil {
+public class WildcardUtil implements Serializable {
 
-    /**
-     * Convert wildcard pattern to Pattern
-     * @param pattern String containing wildcard pattern
-     * @return compiled regular expression as a Pattern
-     */
-    public static Pattern compileWildcardPattern(String pattern) {
-        StringBuilder buf = new StringBuilder(pattern);
+   /**
+    * Convert wildcard pattern to Pattern
+    * @param pattern String containing wildcard pattern
+    * @return compiled regular expression as a Pattern
+    */
+   public static Pattern compileWildcardPattern(String pattern) {
+      StringBuilder buf = new StringBuilder(pattern);
+      for (int i = buf.length() - 1; i >= 0; i--) {
+         char c = buf.charAt(i);
+         if (c == '*' && (i == 0 || buf.charAt(i - 1) != '\\')) {
+            buf.insert(i + 1, '?');
+            buf.insert(i, '.');
+         } else if (c == '*') {
+            i--;
+            // skip backslash, too
+         } else if (needsBackslashToBeLiteralInRegex(c)) {
+            buf.insert(i, '\\');
+         }
+      }
+      return Pattern.compile(buf.toString());
+   }
 
-        for (int i=buf.length()-1; i>=0; i--)
-        {
-            char c = buf.charAt(i);
-            if (c == '*' && (i == 0 || buf.charAt(i-1) != '\\'))
-            {
-                buf.insert(i+1, '?');
-                buf.insert(i, '.');
-            }
-            else if (c == '*')
-            {
-                i--;	// skip backslash, too
-            }
-            else if (needsBackslashToBeLiteralInRegex(c))
-            {
-                buf.insert(i, '\\');
-            }
-        }
+   /**
+    * @param c character to test
+    * @return true if the given character must be escaped to be a literal
+    * inside a regular expression.
+    */
+   private static final String theSpecialRegexCharList = ".[]\\?*+{}|()^$";
 
-        return Pattern.compile(buf.toString());
-    }
-
-    /**
-     * @param c character to test
-     * @return true if the given character must be escaped to be a literal
-     * inside a regular expression.
-     */
-
-    private static final String theSpecialRegexCharList = ".[]\\?*+{}|()^$";
-
-    public static boolean needsBackslashToBeLiteralInRegex(
-        char c)
-    {
-        return (theSpecialRegexCharList.indexOf(c) >= 0);
-    }
-
+   public static boolean needsBackslashToBeLiteralInRegex(char c) {
+      return (theSpecialRegexCharList.indexOf(c) >= 0);
+   }
 }

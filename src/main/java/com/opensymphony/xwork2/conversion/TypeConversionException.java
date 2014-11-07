@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.opensymphony.xwork2.conversion;
 
 import com.opensymphony.xwork2.XWorkException;
-
+import java.io.Serializable;
 
 /**
  * TypeConversionException should be thrown by any TypeConverters which fail to convert values
@@ -24,38 +25,38 @@ import com.opensymphony.xwork2.XWorkException;
  * @author Jason Carreira
  *         Created Oct 3, 2003 12:18:33 AM
  */
-public class TypeConversionException extends XWorkException {
+public class TypeConversionException extends XWorkException implements Serializable {
 
-    /**
-     * Constructs a <code>XWorkException</code> with no detail  message.
-     */
-    public TypeConversionException() {
-    }
+   /**
+    * Constructs a <code>XWorkException</code> with no detail  message.
+    */
+   public TypeConversionException() {
+   }
 
-    /**
-     * Constructs a <code>XWorkException</code> with the specified
-     * detail message.
-     *
-     * @param s the detail message.
-     */
-    public TypeConversionException(String s) {
-        super(s);
-    }
+   /**
+    * Constructs a <code>XWorkException</code> with the specified
+    * detail message.
+    *
+    * @param s the detail message.
+    */
+   public TypeConversionException(String s) {
+      super(s);
+   }
 
-    /**
-     * Constructs a <code>XWorkException</code> with no detail  message.
-     */
-    public TypeConversionException(Throwable cause) {
-        super(cause);
-    }
+   /**
+    * Constructs a <code>XWorkException</code> with no detail  message.
+    */
+   public TypeConversionException(Throwable cause) {
+      super(cause);
+   }
 
-    /**
-     * Constructs a <code>XWorkException</code> with the specified
-     * detail message.
-     *
-     * @param s the detail message.
-     */
-    public TypeConversionException(String s, Throwable cause) {
-        super(s, cause);
-    }
+   /**
+    * Constructs a <code>XWorkException</code> with the specified
+    * detail message.
+    *
+    * @param s the detail message.
+    */
+   public TypeConversionException(String s, Throwable cause) {
+      super(s, cause);
+   }
 }

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.opensymphony.xwork2;
 
 import com.opensymphony.xwork2.config.Configuration;
@@ -23,40 +24,44 @@ import com.opensymphony.xwork2.inject.Container;
 import com.opensymphony.xwork2.util.XWorkTestCaseHelper;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
+import java.io.Serializable;
 
 /**
  * Base test class for TestNG unit tests.  Provides common XWork variables
  * and performs XWork setup and teardown processes
  */
-public class TestNGXWorkTestCase {
+public class TestNGXWorkTestCase implements Serializable {
 
-    protected ConfigurationManager configurationManager;
-    protected Configuration configuration;
-    protected Container container;
-    protected ActionProxyFactory actionProxyFactory;
+   protected ConfigurationManager configurationManager;
 
-    @BeforeTest
-    protected void setUp() throws Exception {
-        configurationManager = XWorkTestCaseHelper.setUp();
-        configuration = new MockConfiguration();
-        ((MockConfiguration) configuration).selfRegister();
-        container = configuration.getContainer();
-        actionProxyFactory = container.getInstance(ActionProxyFactory.class);
-    }
+   protected Configuration configuration;
 
-    @AfterTest
-    protected void tearDown() throws Exception {
-        XWorkTestCaseHelper.tearDown(configurationManager);
-        configurationManager = null;
-        configuration = null;
-        container = null;
-        actionProxyFactory = null;
-    }
+   protected Container container;
 
-    protected void loadConfigurationProviders(ConfigurationProvider... providers) {
-        configurationManager = XWorkTestCaseHelper.loadConfigurationProviders(configurationManager, providers);
-        configuration = configurationManager.getConfiguration();
-        container = configuration.getContainer();
-        actionProxyFactory = container.getInstance(ActionProxyFactory.class);
-    }
+   protected ActionProxyFactory actionProxyFactory;
+
+   @BeforeTest
+   protected void setUp() throws Exception {
+      configurationManager = XWorkTestCaseHelper.setUp();
+      configuration = new MockConfiguration();
+      ((MockConfiguration) configuration).selfRegister();
+      container = configuration.getContainer();
+      actionProxyFactory = container.getInstance(ActionProxyFactory.class);
+   }
+
+   @AfterTest
+   protected void tearDown() throws Exception {
+      XWorkTestCaseHelper.tearDown(configurationManager);
+      configurationManager = null;
+      configuration = null;
+      container = null;
+      actionProxyFactory = null;
+   }
+
+   protected void loadConfigurationProviders(ConfigurationProvider... providers) {
+      configurationManager = XWorkTestCaseHelper.loadConfigurationProviders(configurationManager, providers);
+      configuration = configurationManager.getConfiguration();
+      container = configuration.getContainer();
+      actionProxyFactory = container.getInstance(ActionProxyFactory.class);
+   }
 }

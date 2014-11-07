@@ -13,7 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.opensymphony.xwork2.validator.validators;
+
+import java.io.Serializable;
 
 /**
  * <!-- START SNIPPET: javadoc -->
@@ -74,10 +77,9 @@ package com.opensymphony.xwork2.validator.validators;
  * @author Jason Carreira
  * @version $Date: 2013-01-09 23:21:56 +0100 (Wed, 09 Jan 2013) $ $Id: IntRangeFieldValidator.java 1431115 2013-01-09 22:21:56Z lukaszlenart $
  */
-public class IntRangeFieldValidator extends AbstractRangeValidator<Integer> {
+public class IntRangeFieldValidator extends AbstractRangeValidator<Integer> implements Serializable {
 
-    public IntRangeFieldValidator() {
-        super(Integer.class);
-    }
-
+   public IntRangeFieldValidator() {
+      super(Integer.class);
+   }
 }

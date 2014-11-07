@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.opensymphony.xwork2.validator.validators;
 
 import com.opensymphony.xwork2.ActionContext;
@@ -22,9 +23,8 @@ import com.opensymphony.xwork2.validator.ActionValidatorManager;
 import com.opensymphony.xwork2.validator.DelegatingValidatorContext;
 import com.opensymphony.xwork2.validator.ValidationException;
 import com.opensymphony.xwork2.validator.ValidatorContext;
-
 import java.util.Collection;
-
+import java.io.Serializable;
 
 /**
  * <!-- START SNIPPET: javadoc -->
@@ -77,140 +77,134 @@ import java.util.Collection;
  * @author Rainer Hermanns
  * @version $Date: 2009-12-27 19:18:29 +0100 (Sun, 27 Dec 2009) $ $Id: VisitorFieldValidator.java 894090 2009-12-27 18:18:29Z martinc $
  */
-public class VisitorFieldValidator extends FieldValidatorSupport {
+public class VisitorFieldValidator extends FieldValidatorSupport implements Serializable {
 
-    private String context;
-    private boolean appendPrefix = true;
-    private ActionValidatorManager actionValidatorManager;
+   private String context;
 
+   private boolean appendPrefix = true;
 
-    @Inject
-    public void setActionValidatorManager(ActionValidatorManager mgr) {
-        this.actionValidatorManager = mgr;
-    }
+   private ActionValidatorManager actionValidatorManager;
 
-    /**
-     * Sets whether the field name of this field validator should be prepended to the field name of
-     * the visited field to determine the full field name when an error occurs.  The default is
-     * true.
-     */
-    public void setAppendPrefix(boolean appendPrefix) {
-        this.appendPrefix = appendPrefix;
-    }
+   @Inject
+   public void setActionValidatorManager(ActionValidatorManager mgr) {
+      this.actionValidatorManager = mgr;
+   }
 
-    /**
-     * Flags whether the field name of this field validator should be prepended to the field name of
-     * the visited field to determine the full field name when an error occurs.  The default is
-     * true.
-     */
-    public boolean isAppendPrefix() {
-        return appendPrefix;
-    }
+   /**
+    * Sets whether the field name of this field validator should be prepended to the field name of
+    * the visited field to determine the full field name when an error occurs.  The default is
+    * true.
+    */
+   public void setAppendPrefix(boolean appendPrefix) {
+      this.appendPrefix = appendPrefix;
+   }
 
-    public void setContext(String context) {
-        this.context = context;
-    }
+   /**
+    * Flags whether the field name of this field validator should be prepended to the field name of
+    * the visited field to determine the full field name when an error occurs.  The default is
+    * true.
+    */
+   public boolean isAppendPrefix() {
+      return appendPrefix;
+   }
 
-    public String getContext() {
-        return context;
-    }
+   public void setContext(String context) {
+      this.context = context;
+   }
 
-    public void validate(Object object) throws ValidationException {
-        String fieldName = getFieldName();
-        Object value = this.getFieldValue(fieldName, object);
-        if (value == null) {
-            log.warn("The visited object is null, VisitorValidator will not be able to handle validation properly. Please make sure the visited object is not null for VisitorValidator to function properly");
-            return;
-        }
-        ValueStack stack = ActionContext.getContext().getValueStack();
+   public String getContext() {
+      return context;
+   }
 
-        stack.push(object);
+   public void validate(Object object) throws ValidationException {
+      String fieldName = getFieldName();
+      Object value = this.getFieldValue(fieldName, object);
+      if (value == null) {
+         log.warn("The visited object is null, VisitorValidator will not be able to handle validation properly. Please make sure the visited object is not null for VisitorValidator to function properly");
+         return;
+      }
+      ValueStack stack = ActionContext.getContext().getValueStack();
+      stack.push(object);
+      String visitorContext = (context == null) ? ActionContext.getContext().getName() : context;
+      if (value instanceof Collection) {
+         Collection coll = (Collection) value;
+         Object[] array = coll.toArray();
+         validateArrayElements(array, fieldName, visitorContext);
+      } else if (value instanceof Object[]) {
+         Object[] array = (Object[]) value;
+         validateArrayElements(array, fieldName, visitorContext);
+      } else {
+         validateObject(fieldName, value, visitorContext);
+      }
+      stack.pop();
+   }
 
-        String visitorContext = (context == null) ? ActionContext.getContext().getName() : context;
+   private void validateArrayElements(Object[] array, String fieldName, String visitorContext)
+         throws ValidationException {
+      if (array == null) {
+         return;
+      }
+      for (int i = 0; i < array.length; i++) {
+         Object o = array[i];
+         if (o != null) {
+            validateObject(fieldName + "[" + i + "]", o, visitorContext);
+         }
+      }
+   }
 
-        if (value instanceof Collection) {
-            Collection coll = (Collection) value;
-            Object[] array = coll.toArray();
+   private void validateObject(String fieldName, Object o, String visitorContext) throws ValidationException {
+      ValueStack stack = ActionContext.getContext().getValueStack();
+      stack.push(o);
+      ValidatorContext validatorContext;
+      if (appendPrefix) {
+         validatorContext = new AppendingValidatorContext(getValidatorContext(), o, fieldName, getMessage(o));
+      } else {
+         ValidatorContext parent = getValidatorContext();
+         validatorContext = new DelegatingValidatorContext(parent, DelegatingValidatorContext.makeTextProvider(o,
+               parent), parent);
+      }
+      actionValidatorManager.validate(o, visitorContext, validatorContext);
+      stack.pop();
+   }
 
-            validateArrayElements(array, fieldName, visitorContext);
-        } else if (value instanceof Object[]) {
-            Object[] array = (Object[]) value;
+   public static class AppendingValidatorContext extends DelegatingValidatorContext {
 
-            validateArrayElements(array, fieldName, visitorContext);
-        } else {
-            validateObject(fieldName, value, visitorContext);
-        }
+      private String field;
 
-        stack.pop();
-    }
+      private String message;
 
-    private void validateArrayElements(Object[] array, String fieldName, String visitorContext) throws ValidationException {
-        if (array == null) {
-            return;
-        }
+      private ValidatorContext parent;
 
-        for (int i = 0; i < array.length; i++) {
-            Object o = array[i];
-            if (o != null) {
-                validateObject(fieldName + "[" + i + "]", o, visitorContext);
-            }
-        }
-    }
+      public AppendingValidatorContext(ValidatorContext parent, Object object, String field, String message) {
+         super(parent, makeTextProvider(object, parent), parent);
+         this.field = field;
+         this.message = message;
+         this.parent = parent;
+      }
 
-    private void validateObject(String fieldName, Object o, String visitorContext) throws ValidationException {
-        ValueStack stack = ActionContext.getContext().getValueStack();
-        stack.push(o);
+      /**
+       * Translates a simple field name into a full field name in Ognl syntax
+       *
+       * @param fieldName field name in OGNL syntax
+       * @return field name in OGNL syntax
+       */
+      @Override
+      public String getFullFieldName(String fieldName) {
+         return field + "." + fieldName;
+      }
 
-        ValidatorContext validatorContext;
+      public String getFullFieldNameFromParent(String fieldName) {
+         return parent.getFullFieldName(field + "." + fieldName);
+      }
 
-        if (appendPrefix) {
-            validatorContext = new AppendingValidatorContext(getValidatorContext(), o, fieldName, getMessage(o));
-        } else {
-            ValidatorContext parent = getValidatorContext();
-            validatorContext = new DelegatingValidatorContext(parent, DelegatingValidatorContext.makeTextProvider(o, parent), parent);
-        }
+      @Override
+      public void addActionError(String anErrorMessage) {
+         super.addFieldError(getFullFieldName(field), message + anErrorMessage);
+      }
 
-        actionValidatorManager.validate(o, visitorContext, validatorContext);
-        stack.pop();
-    }
-
-
-    public static class AppendingValidatorContext extends DelegatingValidatorContext {
-        private String field;
-        private String message;
-        private ValidatorContext parent;
-
-        public AppendingValidatorContext(ValidatorContext parent, Object object, String field, String message) {
-            super(parent, makeTextProvider(object, parent), parent);
-
-            this.field = field;
-            this.message = message;
-            this.parent = parent;
-        }
-
-        /**
-         * Translates a simple field name into a full field name in Ognl syntax
-         *
-         * @param fieldName field name in OGNL syntax
-         * @return field name in OGNL syntax
-         */
-        @Override
-        public String getFullFieldName(String fieldName) {
-            return field + "." + fieldName;
-        }
-
-        public String getFullFieldNameFromParent(String fieldName) {
-            return parent.getFullFieldName(field + "." + fieldName);
-        }
-
-        @Override
-        public void addActionError(String anErrorMessage) {
-            super.addFieldError(getFullFieldName(field), message + anErrorMessage);
-        }
-
-        @Override
-        public void addFieldError(String fieldName, String errorMessage) {
-            super.addFieldError(getFullFieldName(fieldName), message + errorMessage);
-        }
-    }
+      @Override
+      public void addFieldError(String fieldName, String errorMessage) {
+         super.addFieldError(getFullFieldName(fieldName), message + errorMessage);
+      }
+   }
 }

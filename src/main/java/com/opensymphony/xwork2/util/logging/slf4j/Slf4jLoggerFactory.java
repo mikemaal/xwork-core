@@ -13,24 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.opensymphony.xwork2.util.logging.slf4j;
 
 import com.opensymphony.xwork2.util.logging.Logger;
 import com.opensymphony.xwork2.util.logging.LoggerFactory;
+import java.io.Serializable;
 
 /**
  * Creates slf4j-logging-backed loggers
  */
-public class Slf4jLoggerFactory extends LoggerFactory {
+public class Slf4jLoggerFactory extends LoggerFactory implements Serializable {
 
-    @Override
-    protected Logger getLoggerImpl(Class<?> cls) {
-        return new Slf4jLogger(org.slf4j.LoggerFactory.getLogger(cls));
-    }
+   @Override
+   protected Logger getLoggerImpl(Class<?> cls) {
+      return new Slf4jLogger(org.slf4j.LoggerFactory.getLogger(cls));
+   }
 
-    @Override
-    protected Logger getLoggerImpl(String name) {
-        return new Slf4jLogger(org.slf4j.LoggerFactory.getLogger(name));
-    }
-
+   @Override
+   protected Logger getLoggerImpl(String name) {
+      return new Slf4jLogger(org.slf4j.LoggerFactory.getLogger(name));
+   }
 }

@@ -26,6 +26,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.web.context.WebApplicationContext;
+import java.io.Serializable;
 
 /**
  * <!-- START SNIPPET: description -->
@@ -59,80 +60,81 @@ import org.springframework.web.context.WebApplicationContext;
  * @author Simon Stewart
  * @author Eric Hauser
  */
-public class ActionAutowiringInterceptor extends AbstractInterceptor implements ApplicationContextAware {
-    private static final Logger LOG = LoggerFactory.getLogger(ActionAutowiringInterceptor.class);
+public class ActionAutowiringInterceptor extends AbstractInterceptor implements ApplicationContextAware, Serializable {
 
-    public static final String APPLICATION_CONTEXT = "com.opensymphony.xwork2.spring.interceptor.ActionAutowiringInterceptor.applicationContext";
+   private static final Logger LOG = LoggerFactory.getLogger(ActionAutowiringInterceptor.class);
 
-    private boolean initialized = false;
-    private ApplicationContext context;
-    private SpringObjectFactory factory;
-    private Integer autowireStrategy;
+   public static final String APPLICATION_CONTEXT = "com.opensymphony.xwork2.spring.interceptor.ActionAutowiringInterceptor.applicationContext";
 
-    /**
-     * @param autowireStrategy
-     */
-    public void setAutowireStrategy(Integer autowireStrategy) {
-        this.autowireStrategy = autowireStrategy;
-    }
+   private boolean initialized = false;
 
-    /**
-     * Looks for the <code>ApplicationContext</code> under the attribute that the Spring listener sets in
-     * the servlet context.  The configuration is done the first time here instead of in init() since the
-     * <code>ActionContext</code> is not available during <code>Interceptor</code> initialization.
-     * <p/>
-     * Autowires the action to Spring beans and places the <code>ApplicationContext</code>
-     * on the <code>ActionContext</code>
-     * <p/>
-     * TODO Should this check to see if the <code>SpringObjectFactory</code> has already been configured
-     * instead of instantiating a new one?  Or is there a good reason for the interceptor to have it's own
-     * factory?
-     *
-     * @param invocation
-     * @throws Exception
-     */
-    @Override public String intercept(ActionInvocation invocation) throws Exception {
-        if (!initialized) {
-            ApplicationContext applicationContext = (ApplicationContext) ActionContext.getContext().getApplication().get(
-                    WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE);
+   private ApplicationContext context;
 
-            if (applicationContext == null) {
-                if (LOG.isWarnEnabled()) {
-                    LOG.warn("ApplicationContext could not be found.  Action classes will not be autowired.");
-                }
-            } else {
-                setApplicationContext(applicationContext);
-                factory = new SpringObjectFactory();
-                factory.setApplicationContext(getApplicationContext());
-                if (autowireStrategy != null) {
-                    factory.setAutowireStrategy(autowireStrategy.intValue());
-                }
+   private SpringObjectFactory factory;
+
+   private Integer autowireStrategy;
+
+   /**
+    * @param autowireStrategy
+    */
+   public void setAutowireStrategy(Integer autowireStrategy) {
+      this.autowireStrategy = autowireStrategy;
+   }
+
+   /**
+    * Looks for the <code>ApplicationContext</code> under the attribute that the Spring listener sets in
+    * the servlet context.  The configuration is done the first time here instead of in init() since the
+    * <code>ActionContext</code> is not available during <code>Interceptor</code> initialization.
+    * <p/>
+    * Autowires the action to Spring beans and places the <code>ApplicationContext</code>
+    * on the <code>ActionContext</code>
+    * <p/>
+    * TODO Should this check to see if the <code>SpringObjectFactory</code> has already been configured
+    * instead of instantiating a new one?  Or is there a good reason for the interceptor to have it's own
+    * factory?
+    *
+    * @param invocation
+    * @throws Exception
+    */
+   @Override
+   public String intercept(ActionInvocation invocation) throws Exception {
+      if (!initialized) {
+         ApplicationContext applicationContext = (ApplicationContext) ActionContext.getContext().getApplication()
+               .get(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE);
+         if (applicationContext == null) {
+            if (LOG.isWarnEnabled()) {
+               LOG.warn("ApplicationContext could not be found.  Action classes will not be autowired.");
             }
-            initialized = true;
-        }
+         } else {
+            setApplicationContext(applicationContext);
+            factory = new SpringObjectFactory();
+            factory.setApplicationContext(getApplicationContext());
+            if (autowireStrategy != null) {
+               factory.setAutowireStrategy(autowireStrategy.intValue());
+            }
+         }
+         initialized = true;
+      }
+      if (factory != null) {
+         Object bean = invocation.getAction();
+         factory.autoWireBean(bean);
+         ActionContext.getContext().put(APPLICATION_CONTEXT, context);
+      }
+      return invocation.invoke();
+   }
 
-        if (factory != null) {
-            Object bean = invocation.getAction();
-            factory.autoWireBean(bean);
-    
-            ActionContext.getContext().put(APPLICATION_CONTEXT, context);
-        }
-        return invocation.invoke();
-    }
+   /**
+    * @param applicationContext
+    * @throws BeansException
+    */
+   public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+      context = applicationContext;
+   }
 
-    /**
-     * @param applicationContext
-     * @throws BeansException
-     */
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        context = applicationContext;
-    }
-
-    /**
-     * @return context
-     */
-    protected ApplicationContext getApplicationContext() {
-        return context;
-    }
-
+   /**
+    * @return context
+    */
+   protected ApplicationContext getApplicationContext() {
+      return context;
+   }
 }

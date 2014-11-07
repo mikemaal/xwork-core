@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.opensymphony.xwork2.interceptor;
 
 import com.opensymphony.xwork2.Action;
@@ -21,8 +22,8 @@ import com.opensymphony.xwork2.ValidationAware;
 import com.opensymphony.xwork2.interceptor.annotations.InputConfig;
 import com.opensymphony.xwork2.util.logging.Logger;
 import com.opensymphony.xwork2.util.logging.LoggerFactory;
-
 import java.lang.reflect.Method;
+import java.io.Serializable;
 
 /**
  * <!-- START SNIPPET: description -->
@@ -117,105 +118,101 @@ import java.lang.reflect.Method;
  * @author Philip Luppens
  * @author tm_jee
  */
-public class DefaultWorkflowInterceptor extends MethodFilterInterceptor {
+public class DefaultWorkflowInterceptor extends MethodFilterInterceptor implements Serializable {
 
-    private static final long serialVersionUID = 7563014655616490865L;
+   private static final long serialVersionUID = 7563014655616490865L;
 
-    private static final Logger LOG = LoggerFactory.getLogger(DefaultWorkflowInterceptor.class);
+   private static final Logger LOG = LoggerFactory.getLogger(DefaultWorkflowInterceptor.class);
 
-    private static final Class[] EMPTY_CLASS_ARRAY = new Class[0];
+   private static final Class[] EMPTY_CLASS_ARRAY = new Class[0];
 
-    private String inputResultName = Action.INPUT;
+   private String inputResultName = Action.INPUT;
 
-    /**
-     * Set the <code>inputResultName</code> (result name to be returned when
-     * a action / field error is found registered). Default to {@link Action#INPUT}
-     *
-     * @param inputResultName what result name to use when there was validation error(s).
-     */
-    public void setInputResultName(String inputResultName) {
-        this.inputResultName = inputResultName;
-    }
+   /**
+    * Set the <code>inputResultName</code> (result name to be returned when
+    * a action / field error is found registered). Default to {@link Action#INPUT}
+    *
+    * @param inputResultName what result name to use when there was validation error(s).
+    */
+   public void setInputResultName(String inputResultName) {
+      this.inputResultName = inputResultName;
+   }
 
-    /**
-     * Intercept {@link ActionInvocation} and returns a <code>inputResultName</code>
-     * when action / field errors is found registered.
-     *
-     * @return String result name
-     */
-    @Override
-    protected String doIntercept(ActionInvocation invocation) throws Exception {
-        Object action = invocation.getAction();
-
-        if (action instanceof ValidationAware) {
-            ValidationAware validationAwareAction = (ValidationAware) action;
-
-            if (validationAwareAction.hasErrors()) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Errors on action [#0], returning result name [#1]", validationAwareAction, inputResultName);
-                }
-
-                String resultName = inputResultName;
-                resultName = processValidationWorkflowAware(action, resultName);
-                resultName = processInputConfig(action, invocation.getProxy().getMethod(), resultName);
-                resultName = processValidationErrorAware(action, resultName);
-
-                return resultName;
-            }
-        }
-
-        return invocation.invoke();
-    }
-
-    /**
-     * Process {@link ValidationWorkflowAware} interface
-     */
-    private String processValidationWorkflowAware(final Object action, final String currentResultName) {
-        String resultName = currentResultName;
-        if (action instanceof ValidationWorkflowAware) {
-            resultName = ((ValidationWorkflowAware) action).getInputResultName();
+   /**
+    * Intercept {@link ActionInvocation} and returns a <code>inputResultName</code>
+    * when action / field errors is found registered.
+    *
+    * @return String result name
+    */
+   @Override
+   protected String doIntercept(ActionInvocation invocation) throws Exception {
+      Object action = invocation.getAction();
+      if (action instanceof ValidationAware) {
+         ValidationAware validationAwareAction = (ValidationAware) action;
+         if (validationAwareAction.hasErrors()) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Changing result name from [#0] to [#1] because of processing [#2] interface applied to [#3]",
-                        currentResultName, resultName, InputConfig.class.getSimpleName(), ValidationWorkflowAware.class.getSimpleName(), action);
+               LOG.debug("Errors on action [#0], returning result name [#1]", validationAwareAction, inputResultName);
             }
-        }
-        return resultName;
-    }
+            String resultName = inputResultName;
+            resultName = processValidationWorkflowAware(action, resultName);
+            resultName = processInputConfig(action, invocation.getProxy().getMethod(), resultName);
+            resultName = processValidationErrorAware(action, resultName);
+            return resultName;
+         }
+      }
+      return invocation.invoke();
+   }
 
-    /**
-     * Process {@link InputConfig} annotation applied to method
-     */
-    protected String processInputConfig(final Object action, final String method, final String currentResultName) throws Exception {
-        String resultName = currentResultName;
-        InputConfig annotation = action.getClass().getMethod(method, EMPTY_CLASS_ARRAY).getAnnotation(InputConfig.class);
-        if (annotation != null) {
-            if (!annotation.methodName().equals("")) {
-                Method m = action.getClass().getMethod(annotation.methodName());
-                resultName = (String) m.invoke(action);
-            } else {
-                resultName = annotation.resultName();
-            }
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Changing result name from [#0] to [#1] because of processing annotation [#2] on action [#3]",
-                        currentResultName, resultName, InputConfig.class.getSimpleName(), action);
-            }
-        }
-        return resultName;
-    }
+   /**
+    * Process {@link ValidationWorkflowAware} interface
+    */
+   private String processValidationWorkflowAware(final Object action, final String currentResultName) {
+      String resultName = currentResultName;
+      if (action instanceof ValidationWorkflowAware) {
+         resultName = ((ValidationWorkflowAware) action).getInputResultName();
+         if (LOG.isDebugEnabled()) {
+            LOG.debug("Changing result name from [#0] to [#1] because of processing [#2] interface applied to [#3]",
+                  currentResultName, resultName, InputConfig.class.getSimpleName(),
+                  ValidationWorkflowAware.class.getSimpleName(), action);
+         }
+      }
+      return resultName;
+   }
 
-    /**
-     * Notify action if it implements {@see ValidationErrorAware} interface
-     */
-    protected String processValidationErrorAware(final Object action, final String currentResultName) {
-        String resultName = currentResultName;
-        if (action instanceof ValidationErrorAware) {
-            resultName = ((ValidationErrorAware) action).actionErrorOccurred(currentResultName);
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Changing result name from [#0] to [#1] because of processing interface [#2] on action [#3]",
-                        currentResultName, resultName, ValidationErrorAware.class.getSimpleName(), action);
-            }
-        }
-        return resultName;
-    }
+   /**
+    * Process {@link InputConfig} annotation applied to method
+    */
+   protected String processInputConfig(final Object action, final String method, final String currentResultName)
+         throws Exception {
+      String resultName = currentResultName;
+      InputConfig annotation = action.getClass().getMethod(method, EMPTY_CLASS_ARRAY).getAnnotation(InputConfig.class);
+      if (annotation != null) {
+         if (!annotation.methodName().equals("")) {
+            Method m = action.getClass().getMethod(annotation.methodName());
+            resultName = (String) m.invoke(action);
+         } else {
+            resultName = annotation.resultName();
+         }
+         if (LOG.isDebugEnabled()) {
+            LOG.debug("Changing result name from [#0] to [#1] because of processing annotation [#2] on action [#3]",
+                  currentResultName, resultName, InputConfig.class.getSimpleName(), action);
+         }
+      }
+      return resultName;
+   }
 
+   /**
+    * Notify action if it implements {@see ValidationErrorAware} interface
+    */
+   protected String processValidationErrorAware(final Object action, final String currentResultName) {
+      String resultName = currentResultName;
+      if (action instanceof ValidationErrorAware) {
+         resultName = ((ValidationErrorAware) action).actionErrorOccurred(currentResultName);
+         if (LOG.isDebugEnabled()) {
+            LOG.debug("Changing result name from [#0] to [#1] because of processing interface [#2] on action [#3]",
+                  currentResultName, resultName, ValidationErrorAware.class.getSimpleName(), action);
+         }
+      }
+      return resultName;
+   }
 }

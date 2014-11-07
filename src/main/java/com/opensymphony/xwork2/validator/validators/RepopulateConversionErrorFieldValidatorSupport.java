@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.opensymphony.xwork2.validator.validators;
 
 import com.opensymphony.xwork2.ActionContext;
@@ -23,9 +24,9 @@ import com.opensymphony.xwork2.util.logging.Logger;
 import com.opensymphony.xwork2.util.logging.LoggerFactory;
 import com.opensymphony.xwork2.validator.ValidationException;
 import org.apache.commons.lang3.StringEscapeUtils;
-
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.io.Serializable;
 
 /**
  *
@@ -132,76 +133,75 @@ import java.util.Map;
  * @author tm_jee
  * @version $Date: 2013-03-16 16:55:48 +0100 (Sat, 16 Mar 2013) $ $Id: RepopulateConversionErrorFieldValidatorSupport.java 1457267 2013-03-16 15:55:48Z lukaszlenart $
  */
-public abstract class RepopulateConversionErrorFieldValidatorSupport extends FieldValidatorSupport {
+public abstract class RepopulateConversionErrorFieldValidatorSupport extends FieldValidatorSupport implements
+      Serializable {
 
-    private static final Logger LOG = LoggerFactory.getLogger(RepopulateConversionErrorFieldValidatorSupport.class);
+   private static final Logger LOG = LoggerFactory.getLogger(RepopulateConversionErrorFieldValidatorSupport.class);
 
-    private boolean repopulateField = false;
+   private boolean repopulateField = false;
 
-    public boolean isRepopulateField() {
-        return repopulateField;
-    }
+   public boolean isRepopulateField() {
+      return repopulateField;
+   }
 
-    public void setRepopulateField(boolean repopulateField) {
-        this.repopulateField = repopulateField;
-    }
+   public void setRepopulateField(boolean repopulateField) {
+      this.repopulateField = repopulateField;
+   }
 
-    public void validate(Object object) throws ValidationException {
-        doValidate(object);
-        if (repopulateField) {
-            repopulateField(object);
-        }
-    }
+   public void validate(Object object) throws ValidationException {
+      doValidate(object);
+      if (repopulateField) {
+         repopulateField(object);
+      }
+   }
 
-    public void repopulateField(Object object) throws ValidationException {
-
-        ActionInvocation invocation = ActionContext.getContext().getActionInvocation();
-        Map<String, Object> conversionErrors = ActionContext.getContext().getConversionErrors();
-
-        String fieldName = getFieldName();
-        String fullFieldName = getValidatorContext().getFullFieldName(fieldName);
-        if (conversionErrors.containsKey(fullFieldName)) {
-            Object value = conversionErrors.get(fullFieldName);
-
-            final Map<Object, Object> fakeParams = new LinkedHashMap<Object, Object>();
-            boolean doExprOverride = false;
-
-            if (value instanceof String[]) {
-                // take the first element, if possible
-                String[] tmpValue = (String[]) value;
-                if ((tmpValue.length > 0)) {
-                    doExprOverride = true;
-                    fakeParams.put(fullFieldName, escape(tmpValue[0]));
-                } else {
-                    if (LOG.isWarnEnabled()) {
-                        LOG.warn("value is an empty array of String or with first element in it as null [" + value + "], will not repopulate conversion error ");
-                    }
-                }
-            } else if (value instanceof String) {
-                String tmpValue = (String) value;
-                doExprOverride = true;
-                fakeParams.put(fullFieldName, escape(tmpValue));
+   public void repopulateField(Object object) throws ValidationException {
+      ActionInvocation invocation = ActionContext.getContext().getActionInvocation();
+      Map<String, Object> conversionErrors = ActionContext.getContext().getConversionErrors();
+      String fieldName = getFieldName();
+      String fullFieldName = getValidatorContext().getFullFieldName(fieldName);
+      if (conversionErrors.containsKey(fullFieldName)) {
+         Object value = conversionErrors.get(fullFieldName);
+         final Map<Object, Object> fakeParams = new LinkedHashMap<Object, Object>();
+         boolean doExprOverride = false;
+         if (value instanceof String[]) {
+            // take the first element, if possible
+            String[] tmpValue = (String[]) value;
+            if ((tmpValue.length > 0)) {
+               doExprOverride = true;
+               fakeParams.put(fullFieldName, escape(tmpValue[0]));
             } else {
-                // opps... it should be 
-                if (LOG.isWarnEnabled()) {
-                    LOG.warn("conversion error value is not a String or array of String but instead is [" + value + "], will not repopulate conversion error");
-                }
+               if (LOG.isWarnEnabled()) {
+                  LOG.warn("value is an empty array of String or with first element in it as null [" + value
+                        + "], will not repopulate conversion error ");
+               }
             }
-
-            if (doExprOverride) {
-                invocation.addPreResultListener(new PreResultListener() {
-                    public void beforeResult(ActionInvocation invocation, String resultCode) {
-                        ValueStack stack = ActionContext.getContext().getValueStack();
-                        stack.setExprOverrides(fakeParams);
-                    }
-                });
+         } else if (value instanceof String) {
+            String tmpValue = (String) value;
+            doExprOverride = true;
+            fakeParams.put(fullFieldName, escape(tmpValue));
+         } else {
+            // opps... it should be 
+            if (LOG.isWarnEnabled()) {
+               LOG.warn("conversion error value is not a String or array of String but instead is [" + value
+                     + "], will not repopulate conversion error");
             }
-        }
-    }
+         }
+         if (doExprOverride) {
+            invocation.addPreResultListener(new PreResultListener() {
 
-    protected String escape(String value) {
-        return "\"" + StringEscapeUtils.escapeJava(value) + "\"";
-    }
+               public void beforeResult(ActionInvocation invocation, String resultCode) {
+                  ValueStack stack = ActionContext.getContext().getValueStack();
+                  stack.setExprOverrides(fakeParams);
+               }
+            });
+         }
+      }
+   }
 
-    protected abstract void doValidate(Object object) throws ValidationException;
+   protected String escape(String value) {
+      return "\"" + StringEscapeUtils.escapeJava(value) + "\"";
+   }
+
+   protected abstract void doValidate(Object object) throws ValidationException;
 }

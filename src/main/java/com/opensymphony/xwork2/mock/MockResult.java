@@ -13,10 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.opensymphony.xwork2.mock;
 
 import com.opensymphony.xwork2.ActionInvocation;
 import com.opensymphony.xwork2.Result;
+import java.io.Serializable;
 
 /**
  * Mock for a {@link Result}.
@@ -24,27 +26,25 @@ import com.opensymphony.xwork2.Result;
  * @author Mike
  * @author Rainer Hermanns
  */
-public class MockResult implements Result {
+public class MockResult implements Result, Serializable {
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
+   @Override
+   public boolean equals(Object o) {
+      if (this == o) {
+         return true;
+      }
+      if (!(o instanceof MockResult)) {
+         return false;
+      }
+      return true;
+   }
 
-        if (!(o instanceof MockResult)) {
-            return false;
-        }
+   public void execute(ActionInvocation invocation) throws Exception {
+      // no op
+   }
 
-        return true;
-    }
-
-    public void execute(ActionInvocation invocation) throws Exception {
-        // no op
-    }
-
-    @Override
-    public int hashCode() {
-        return 10;
-    }
+   @Override
+   public int hashCode() {
+      return 10;
+   }
 }

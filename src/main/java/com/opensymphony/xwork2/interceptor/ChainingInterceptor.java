@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.opensymphony.xwork2.interceptor;
 
 import com.opensymphony.xwork2.ActionChainResult;
@@ -25,9 +26,8 @@ import com.opensymphony.xwork2.util.ValueStack;
 import com.opensymphony.xwork2.util.logging.Logger;
 import com.opensymphony.xwork2.util.logging.LoggerFactory;
 import com.opensymphony.xwork2.util.reflection.ReflectionProvider;
-
 import java.util.*;
-
+import java.io.Serializable;
 
 /**
  * <!-- START SNIPPET: description -->
@@ -98,133 +98,137 @@ import java.util.*;
  * @author tm_jee ( tm_jee(at)yahoo.co.uk )
  * @see com.opensymphony.xwork2.ActionChainResult
  */
-public class ChainingInterceptor extends AbstractInterceptor {
+public class ChainingInterceptor extends AbstractInterceptor implements Serializable {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ChainingInterceptor.class);
+   private static final Logger LOG = LoggerFactory.getLogger(ChainingInterceptor.class);
 
-    private static final String ACTION_ERRORS = "actionErrors";
-    private static final String FIELD_ERRORS = "fieldErrors";
-    private static final String ACTION_MESSAGES = "actionMessages";
+   private static final String ACTION_ERRORS = "actionErrors";
 
-    private boolean copyMessages = false;
-    private boolean copyErrors = false;
-    private boolean copyFieldErrors = false;
+   private static final String FIELD_ERRORS = "fieldErrors";
 
-    protected Collection<String> excludes;
+   private static final String ACTION_MESSAGES = "actionMessages";
 
-    protected Collection<String> includes;
-    protected ReflectionProvider reflectionProvider;
+   private boolean copyMessages = false;
 
-    @Inject
-    public void setReflectionProvider(ReflectionProvider prov) {
-        this.reflectionProvider = prov;
-    }
+   private boolean copyErrors = false;
 
-    @Inject(value = "struts.xwork.chaining.copyErrors", required = false)
-    public void setCopyErrors(String copyErrors) {
-        this.copyErrors = "true".equalsIgnoreCase(copyErrors);
-    }
+   private boolean copyFieldErrors = false;
 
-    @Inject(value = "struts.xwork.chaining.copyFieldErrors", required = false)
-    public void setCopyFieldErrors(String copyFieldErrors) {
-        this.copyFieldErrors = "true".equalsIgnoreCase(copyFieldErrors);
-    }
+   protected Collection<String> excludes;
 
-    @Inject(value = "struts.xwork.chaining.copyMessages", required = false)
-    public void setCopyMessages(String copyMessages) {
-        this.copyMessages = "true".equalsIgnoreCase(copyMessages);
-    }
+   protected Collection<String> includes;
 
-    @Override
-    public String intercept(ActionInvocation invocation) throws Exception {
-        ValueStack stack = invocation.getStack();
-        CompoundRoot root = stack.getRoot();
-        if (shouldCopyStack(invocation, root)) {
-            copyStack(invocation, root);
-        }
-        return invocation.invoke();
-    }
+   protected ReflectionProvider reflectionProvider;
 
-    private void copyStack(ActionInvocation invocation, CompoundRoot root) {
-        List list = prepareList(root);
-        Map<String, Object> ctxMap = invocation.getInvocationContext().getContextMap();
-        for (Object object : list) {
-            if (shouldCopy(object)) {
-                reflectionProvider.copy(object, invocation.getAction(), ctxMap, prepareExcludes(), includes);
+   @Inject
+   public void setReflectionProvider(ReflectionProvider prov) {
+      this.reflectionProvider = prov;
+   }
+
+   @Inject(value = "struts.xwork.chaining.copyErrors", required = false)
+   public void setCopyErrors(String copyErrors) {
+      this.copyErrors = "true".equalsIgnoreCase(copyErrors);
+   }
+
+   @Inject(value = "struts.xwork.chaining.copyFieldErrors", required = false)
+   public void setCopyFieldErrors(String copyFieldErrors) {
+      this.copyFieldErrors = "true".equalsIgnoreCase(copyFieldErrors);
+   }
+
+   @Inject(value = "struts.xwork.chaining.copyMessages", required = false)
+   public void setCopyMessages(String copyMessages) {
+      this.copyMessages = "true".equalsIgnoreCase(copyMessages);
+   }
+
+   @Override
+   public String intercept(ActionInvocation invocation) throws Exception {
+      ValueStack stack = invocation.getStack();
+      CompoundRoot root = stack.getRoot();
+      if (shouldCopyStack(invocation, root)) {
+         copyStack(invocation, root);
+      }
+      return invocation.invoke();
+   }
+
+   private void copyStack(ActionInvocation invocation, CompoundRoot root) {
+      List list = prepareList(root);
+      Map<String, Object> ctxMap = invocation.getInvocationContext().getContextMap();
+      for (Object object : list) {
+         if (shouldCopy(object)) {
+            reflectionProvider.copy(object, invocation.getAction(), ctxMap, prepareExcludes(), includes);
+         }
+      }
+   }
+
+   private Collection<String> prepareExcludes() {
+      Collection<String> localExcludes = excludes;
+      if (!copyErrors || !copyMessages || !copyFieldErrors) {
+         if (localExcludes == null) {
+            localExcludes = new HashSet<String>();
+            if (!copyErrors) {
+               localExcludes.add(ACTION_ERRORS);
             }
-        }
-    }
-
-    private Collection<String> prepareExcludes() {
-        Collection<String> localExcludes = excludes;
-        if (!copyErrors || !copyMessages ||!copyFieldErrors) {
-            if (localExcludes == null) {
-                localExcludes = new HashSet<String>();
-                if (!copyErrors) {
-                    localExcludes.add(ACTION_ERRORS);
-                }
-                if (!copyMessages) {
-                    localExcludes.add(ACTION_MESSAGES);
-                }
-                if (!copyFieldErrors) {
-                    localExcludes.add(FIELD_ERRORS);
-                }
+            if (!copyMessages) {
+               localExcludes.add(ACTION_MESSAGES);
             }
-        }
-        return localExcludes;
-    }
+            if (!copyFieldErrors) {
+               localExcludes.add(FIELD_ERRORS);
+            }
+         }
+      }
+      return localExcludes;
+   }
 
-    private boolean shouldCopy(Object o) {
-        return o != null && !(o instanceof Unchainable);
-    }
+   private boolean shouldCopy(Object o) {
+      return o != null && !(o instanceof Unchainable);
+   }
 
-    @SuppressWarnings("unchecked")
-    private List prepareList(CompoundRoot root) {
-        List list = new ArrayList(root);
-        list.remove(0);
-        Collections.reverse(list);
-        return list;
-    }
+   @SuppressWarnings("unchecked")
+   private List prepareList(CompoundRoot root) {
+      List list = new ArrayList(root);
+      list.remove(0);
+      Collections.reverse(list);
+      return list;
+   }
 
-    private boolean shouldCopyStack(ActionInvocation invocation, CompoundRoot root) throws Exception {
-        Result result = invocation.getResult();
-        return root.size() > 1 && (result == null || ActionChainResult.class.isAssignableFrom(result.getClass()));
-    }
+   private boolean shouldCopyStack(ActionInvocation invocation, CompoundRoot root) throws Exception {
+      Result result = invocation.getResult();
+      return root.size() > 1 && (result == null || ActionChainResult.class.isAssignableFrom(result.getClass()));
+   }
 
-    /**
-     * Gets list of parameter names to exclude
-     *
-     * @return the exclude list
-     */
-    public Collection<String> getExcludes() {
-        return excludes;
-    }
+   /**
+    * Gets list of parameter names to exclude
+    *
+    * @return the exclude list
+    */
+   public Collection<String> getExcludes() {
+      return excludes;
+   }
 
-    /**
-     * Sets the list of parameter names to exclude from copying (all others will be included).
-     *
-     * @param excludes the excludes list
-     */
-    public void setExcludes(Collection<String> excludes) {
-        this.excludes = excludes;
-    }
+   /**
+    * Sets the list of parameter names to exclude from copying (all others will be included).
+    *
+    * @param excludes the excludes list
+    */
+   public void setExcludes(Collection<String> excludes) {
+      this.excludes = excludes;
+   }
 
-    /**
-     * Gets list of parameter names to include
-     *
-     * @return the include list
-     */
-    public Collection<String> getIncludes() {
-        return includes;
-    }
+   /**
+    * Gets list of parameter names to include
+    *
+    * @return the include list
+    */
+   public Collection<String> getIncludes() {
+      return includes;
+   }
 
-    /**
-     * Sets the list of parameter names to include when copying (all others will be excluded).
-     *
-     * @param includes the includes list
-     */
-    public void setIncludes(Collection<String> includes) {
-        this.includes = includes;
-    }
-
+   /**
+    * Sets the list of parameter names to include when copying (all others will be excluded).
+    *
+    * @param includes the includes list
+    */
+   public void setIncludes(Collection<String> includes) {
+      this.includes = includes;
+   }
 }

@@ -13,39 +13,41 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.opensymphony.xwork2.config.impl;
 
 import com.opensymphony.xwork2.util.PatternMatcher;
-
 import java.util.Map;
 import java.util.Set;
+import java.io.Serializable;
 
 /**
  * Matches namespace strings against a wildcard pattern matcher
  *
  * @Since 2.1
  */
-public class NamespaceMatcher extends AbstractMatcher<NamespaceMatch> {
-     public NamespaceMatcher(PatternMatcher<?> patternMatcher,
-            Set<String> namespaces) {
-        super(patternMatcher);
-        for (String name : namespaces) {
-            if (!patternMatcher.isLiteral(name)) {
-                addPattern(name, new NamespaceMatch(name, null), false);
-            }
-        }
-    }
+public class NamespaceMatcher extends AbstractMatcher<NamespaceMatch> implements Serializable {
 
-    @Override
-    protected NamespaceMatch convert(String path, NamespaceMatch orig, Map<String, String> vars) {
-        /*Map<String,String> origVars = (Map<String,String>)vars;
-        Map<String,String> map = new HashMap<String,String>();
-        for (Map.Entry<String,String> entry : origVars.entrySet()) {
-            if (entry.getKey().length() == 1) {
-                map.put("ns"+entry.getKey(), entry.getValue());
-            }
-        }
-        */
-        return new NamespaceMatch(orig.getPattern(), vars);
-    }
+   public NamespaceMatcher(PatternMatcher<?> patternMatcher, Set<String> namespaces) {
+      super(patternMatcher);
+      for (String name : namespaces) {
+         if (!patternMatcher.isLiteral(name)) {
+            addPattern(name, new NamespaceMatch(name, null), false);
+         }
+      }
+   }
+
+   @Override
+   protected NamespaceMatch convert(String path, NamespaceMatch orig, Map<String, String> vars) {
+      /*Map<String,String> origVars = (Map<String,String>)vars;
+      Map<String,String> map = new HashMap<String,String>();
+      for (Map.Entry<String,String> entry : origVars.entrySet()) {
+          if (entry.getKey().length() == 1) {
+              map.put("ns"+entry.getKey(), entry.getValue());
+          }
+      }
+       */
+
+      return new NamespaceMatch(orig.getPattern(), vars);
+   }
 }

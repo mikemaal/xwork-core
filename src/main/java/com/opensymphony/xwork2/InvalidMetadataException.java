@@ -13,7 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.opensymphony.xwork2;
+
+import java.io.Serializable;
 
 /**
  * <code>InvalidMetadataException</code>
@@ -21,14 +24,14 @@ package com.opensymphony.xwork2;
  * @author Rainer Hermanns
  * @version $Id: InvalidMetadataException.java 894090 2009-12-27 18:18:29Z martinc $
  */
-public class InvalidMetadataException extends RuntimeException {
+public class InvalidMetadataException extends RuntimeException implements Serializable {
 
-    /**
-	 * Create a new <code>InvalidMetadataException</code> with the supplied error message.
-     * 
-	 * @param msg the error message
-	 */
-	public InvalidMetadataException(String msg) {
-		super(msg);
-	}
+   /**
+    * Create a new <code>InvalidMetadataException</code> with the supplied error message.
+    * 
+    * @param msg the error message
+    */
+   public InvalidMetadataException(String msg) {
+      super(msg);
+   }
 }

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.opensymphony.xwork2.interceptor;
 
 import com.opensymphony.xwork2.ActionContext;
@@ -20,10 +21,10 @@ import com.opensymphony.xwork2.ActionInvocation;
 import com.opensymphony.xwork2.util.TextParseUtil;
 import com.opensymphony.xwork2.util.logging.Logger;
 import com.opensymphony.xwork2.util.logging.LoggerFactory;
-
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
+import java.io.Serializable;
 
 /**
  * <!-- START SNIPPET: description -->
@@ -77,71 +78,64 @@ import java.util.Set;
  *  
  * @author martin.gilday
  */
-public class ParameterRemoverInterceptor extends AbstractInterceptor {
+public class ParameterRemoverInterceptor extends AbstractInterceptor implements Serializable {
 
-	private static final Logger LOG = LoggerFactory.getLogger(ParameterRemoverInterceptor.class);
+   private static final Logger LOG = LoggerFactory.getLogger(ParameterRemoverInterceptor.class);
 
-	private static final long serialVersionUID = 1;
+   private static final long serialVersionUID = 1;
 
-	private Set<String> paramNames = Collections.emptySet();
+   private Set<String> paramNames = Collections.emptySet();
 
-	private Set<String> paramValues = Collections.emptySet();
+   private Set<String> paramValues = Collections.emptySet();
 
-	
-	/**
-	 * Decide if the parameter should be removed from the parameter map based on
-	 * <code>paramNames</code> and <code>paramValues</code>.
-	 * 
-	 * @see com.opensymphony.xwork2.interceptor.AbstractInterceptor
-	 */
-	@Override
-	public String intercept(ActionInvocation invocation) throws Exception {
-		if (!(invocation.getAction() instanceof NoParameters)
-				&& (null != this.paramNames)) {
-			ActionContext ac = invocation.getInvocationContext();
-			final Map<String, Object> parameters = ac.getParameters();
+   /**
+    * Decide if the parameter should be removed from the parameter map based on
+    * <code>paramNames</code> and <code>paramValues</code>.
+    * 
+    * @see com.opensymphony.xwork2.interceptor.AbstractInterceptor
+    */
+   @Override
+   public String intercept(ActionInvocation invocation) throws Exception {
+      if (!(invocation.getAction() instanceof NoParameters) && (null != this.paramNames)) {
+         ActionContext ac = invocation.getInvocationContext();
+         final Map<String, Object> parameters = ac.getParameters();
+         if (parameters != null) {
+            for (String removeName : paramNames) {
+               // see if the field is in the parameter map
+               if (parameters.containsKey(removeName)) {
+                  try {
+                     String[] values = (String[]) parameters.get(removeName);
+                     String value = values[0];
+                     if (null != value && this.paramValues.contains(value)) {
+                        parameters.remove(removeName);
+                     }
+                  } catch (Exception e) {
+                     if (LOG.isErrorEnabled()) {
+                        LOG.error("Failed to convert parameter to string", e);
+                     }
+                  }
+               }
+            }
+         }
+      }
+      return invocation.invoke();
+   }
 
-			if (parameters != null) {
-                for (String removeName : paramNames) {
-                    // see if the field is in the parameter map
-                    if (parameters.containsKey(removeName)) {
+   /**
+    * Allows <code>paramNames</code> attribute to be set as comma-separated-values (csv).
+    * 
+    * @param paramNames the paramNames to set
+    */
+   public void setParamNames(String paramNames) {
+      this.paramNames = TextParseUtil.commaDelimitedStringToSet(paramNames);
+   }
 
-                        try {
-                            String[] values = (String[]) parameters
-                                    .get(removeName);
-                            String value = values[0];
-                            if (null != value && this.paramValues.contains(value)) {
-                                parameters.remove(removeName);
-                            }
-                        } catch (Exception e) {
-                            if (LOG.isErrorEnabled()) {
-                                LOG.error("Failed to convert parameter to string", e);
-                            }
-                        }
-                    }
-                }
-			}
-		}
-		return invocation.invoke();
-	}
-
-	/**
-	 * Allows <code>paramNames</code> attribute to be set as comma-separated-values (csv).
-	 * 
-	 * @param paramNames the paramNames to set
-	 */
-	public void setParamNames(String paramNames) {
-		this.paramNames = TextParseUtil.commaDelimitedStringToSet(paramNames);
-	}
-
-
-	/**
-	 * Allows <code>paramValues</code> attribute to be set as a comma-separated-values (csv).
-	 * 
-	 * @param paramValues the paramValues to set
-	 */
-	public void setParamValues(String paramValues) {
-		this.paramValues = TextParseUtil.commaDelimitedStringToSet(paramValues);
-	}
+   /**
+    * Allows <code>paramValues</code> attribute to be set as a comma-separated-values (csv).
+    * 
+    * @param paramValues the paramValues to set
+    */
+   public void setParamValues(String paramValues) {
+      this.paramValues = TextParseUtil.commaDelimitedStringToSet(paramValues);
+   }
 }
-

@@ -13,40 +13,43 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.opensymphony.xwork2.util.finder;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Enumeration;
+import java.io.Serializable;
 
 /**
  * Default implementation of ClassLoaderInterface, which delegates to an actual ClassLoader
  */
-public class ClassLoaderInterfaceDelegate implements ClassLoaderInterface {
-    private ClassLoader classLoader;
+public class ClassLoaderInterfaceDelegate implements ClassLoaderInterface, Serializable {
 
-    public ClassLoaderInterfaceDelegate(ClassLoader classLoader) {
-        this.classLoader = classLoader;
-    }
+   private ClassLoader classLoader;
 
-    public Class<?> loadClass(String name) throws ClassNotFoundException {
-        return classLoader.loadClass(name);
-    }
+   public ClassLoaderInterfaceDelegate(ClassLoader classLoader) {
+      this.classLoader = classLoader;
+   }
 
-    public URL getResource(String className) {
-        return classLoader.getResource(className);
-    }
+   public Class<?> loadClass(String name) throws ClassNotFoundException {
+      return classLoader.loadClass(name);
+   }
 
-    public Enumeration<URL> getResources(String name) throws IOException {
-        return classLoader.getResources(name);
-    }
+   public URL getResource(String className) {
+      return classLoader.getResource(className);
+   }
 
-    public InputStream getResourceAsStream(String name) {
-        return classLoader.getResourceAsStream(name);
-    }
+   public Enumeration<URL> getResources(String name) throws IOException {
+      return classLoader.getResources(name);
+   }
 
-    public ClassLoaderInterface getParent() {
-        return classLoader.getParent() != null ? new ClassLoaderInterfaceDelegate(classLoader.getParent()) : null;
-    }
+   public InputStream getResourceAsStream(String name) {
+      return classLoader.getResourceAsStream(name);
+   }
+
+   public ClassLoaderInterface getParent() {
+      return classLoader.getParent() != null ? new ClassLoaderInterfaceDelegate(classLoader.getParent()) : null;
+   }
 }

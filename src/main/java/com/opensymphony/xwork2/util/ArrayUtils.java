@@ -13,42 +13,44 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.opensymphony.xwork2.util;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.io.Serializable;
 
 /**
  * @author Dan Oxlade, dan d0t oxlade at gmail d0t c0m
  */
-public class ArrayUtils {
+public class ArrayUtils implements Serializable {
 
-    public static boolean isEmpty(Object[] array) {
-        return null == array || array.length == 0;
-    }
+   public static boolean isEmpty(Object[] array) {
+      return null == array || array.length == 0;
+   }
 
-    public static boolean isNotEmpty(Object[] array) {
-        return !isEmpty(array);
-    }
+   public static boolean isNotEmpty(Object[] array) {
+      return !isEmpty(array);
+   }
 
-    /**
-     * Return a collection from the comma delimited String.
-     *
-     * @param commaDelim the comma delimited String.
-     * @return A collection from the comma delimited String. Returns <tt>null</tt> if the string is empty.
-     */
-    public static Collection<String> asCollection(String commaDelim) {
-        if (commaDelim == null || commaDelim.trim().length() == 0) {
-            return null;
-        }
-        return TextParseUtil.commaDelimitedStringToSet(commaDelim);
-    }
+   /**
+    * Return a collection from the comma delimited String.
+    *
+    * @param commaDelim the comma delimited String.
+    * @return A collection from the comma delimited String. Returns <tt>null</tt> if the string is empty.
+    */
+   public static Collection<String> asCollection(String commaDelim) {
+      if (commaDelim == null || commaDelim.trim().length() == 0) {
+         return null;
+      }
+      return TextParseUtil.commaDelimitedStringToSet(commaDelim);
+   }
 
-    public static <T> Set<T> asSet(T... element) {
-        HashSet<T> elements = new HashSet<T>(element.length);
-        Collections.addAll(elements, element);
-        return elements;
-    }
+   public static <T> Set<T> asSet(T... element) {
+      HashSet<T> elements = new HashSet<T>(element.length);
+      Collections.addAll(elements, element);
+      return elements;
+   }
 }

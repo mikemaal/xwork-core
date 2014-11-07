@@ -13,7 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.opensymphony.xwork2.conversion.impl;
+
+import java.io.Serializable;
 
 /**
  * <!-- START SNIPPET: javadoc -->
@@ -87,5 +90,6 @@ package com.opensymphony.xwork2.conversion.impl;
  * @see com.opensymphony.xwork2.conversion.impl.XWorkConverter
  * @deprecated Since XWork 2.0.4, the implementation of XWorkConverter handles the processing of annotations.
  */
-@Deprecated public class AnnotationXWorkConverter extends XWorkConverter {
+@Deprecated
+public class AnnotationXWorkConverter extends XWorkConverter implements Serializable {
 }

@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.opensymphony.xwork2.validator.validators;
 
 import com.opensymphony.xwork2.ActionContext;
 import com.opensymphony.xwork2.conversion.impl.XWorkConverter;
 import com.opensymphony.xwork2.validator.ValidationException;
-
 import java.util.Map;
-
+import java.io.Serializable;
 
 /**
  * <!-- START SNIPPET: javadoc -->
@@ -55,29 +55,27 @@ import java.util.Map;
  * 
  * @version $Date $Id: ConversionErrorFieldValidator.java 894090 2009-12-27 18:18:29Z martinc $
  */
-public class ConversionErrorFieldValidator extends RepopulateConversionErrorFieldValidatorSupport {
+public class ConversionErrorFieldValidator extends RepopulateConversionErrorFieldValidatorSupport implements
+      Serializable {
 
-    /**
-     * The validation implementation must guarantee that setValidatorContext will
-     * be called with a non-null ValidatorContext before validate is called.
-     *
-     * @param object
-     * @throws ValidationException
-     */
-    @Override
-    public void doValidate(Object object) throws ValidationException {
-        String fieldName = getFieldName();
-        String fullFieldName = getValidatorContext().getFullFieldName(fieldName);
-        ActionContext context = ActionContext.getContext();
-        Map<String, Object> conversionErrors = context.getConversionErrors();
-        
-        if (conversionErrors.containsKey(fullFieldName)) {
-            if ((defaultMessage == null) || ("".equals(defaultMessage.trim()))) {
-                defaultMessage = XWorkConverter.getConversionErrorMessage(fullFieldName, context.getValueStack());
-            }
-            
-            addFieldError(fieldName, object);
-        }
-    }
-    
+   /**
+    * The validation implementation must guarantee that setValidatorContext will
+    * be called with a non-null ValidatorContext before validate is called.
+    *
+    * @param object
+    * @throws ValidationException
+    */
+   @Override
+   public void doValidate(Object object) throws ValidationException {
+      String fieldName = getFieldName();
+      String fullFieldName = getValidatorContext().getFullFieldName(fieldName);
+      ActionContext context = ActionContext.getContext();
+      Map<String, Object> conversionErrors = context.getConversionErrors();
+      if (conversionErrors.containsKey(fullFieldName)) {
+         if ((defaultMessage == null) || ("".equals(defaultMessage.trim()))) {
+            defaultMessage = XWorkConverter.getConversionErrorMessage(fullFieldName, context.getValueStack());
+         }
+         addFieldError(fieldName, object);
+      }
+   }
 }
