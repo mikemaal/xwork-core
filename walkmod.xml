@@ -1,12 +1,21 @@
 <!DOCTYPE walkmod PUBLIC "-//WALKMOD//DTD"  "http://www.walkmod.com/dtd/walkmod-1.0.dtd" >
 <walkmod>
- <plugins>
-  <plugin groupId="org.walkmod" artifactId="walkmod-imports-cleaner-plugin" version="2.0" />
-  <plugin groupId="edu.upc.dama" artifactId="walkmod-serializable-plugin" version="1.0" />
-  </plugins>
-  <chain name="main-chain" >
-  <transformation type="edu.upc.dama:walkmod-serializable-plugin:add-serializable-implementation" />
-    <transformation type="walkmod:commons:import-cleaner" />
-    
-  </chain>
+	<plugins>
+		<plugin groupId="org.walkmod" artifactId="walkmod-imports-cleaner-plugin"
+			version="2.0" />
+		<plugin groupId="edu.upc.dama" artifactId="walkmod-serializable-plugin"
+			version="1.0" />
+		<plugin groupId="org.walkmod" artifactId="walkmod-maven-plugin"
+			version="1.0" />
+	</plugins>
+	<conf-providers>
+		<conf-provider type="walkmod:commons:maven"></conf-provider>
+	</conf-providers>
+	<chain name="main-chain">
+		
+		<transformation
+			type="edu.upc.dama:walkmod-serializable-plugin:add-serializable-implementation" />
+		<!-- transformation type="walkmod:commons:import-cleaner" /-->
+
+	</chain>
 </walkmod>
