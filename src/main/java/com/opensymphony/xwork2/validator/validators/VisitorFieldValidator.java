@@ -167,7 +167,7 @@ public class VisitorFieldValidator extends FieldValidatorSupport implements Seri
       stack.pop();
    }
 
-   public static class AppendingValidatorContext extends DelegatingValidatorContext {
+   public static class AppendingValidatorContext extends DelegatingValidatorContext implements Serializable {
 
       private String field;
 

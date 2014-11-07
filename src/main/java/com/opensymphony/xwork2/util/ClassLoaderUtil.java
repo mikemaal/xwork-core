@@ -167,7 +167,7 @@ public class ClassLoaderUtil implements Serializable {
     * Aggregates Enumeration instances into one iterator and filters out duplicates.  Always keeps one
     * ahead of the enumerator to protect against returning duplicates.
     */
-   static class AggregateIterator<E> implements Iterator<E> {
+   static class AggregateIterator<E> implements Iterator<E>, Serializable {
 
       LinkedList<Enumeration<E>> enums = new LinkedList<Enumeration<E>>();
 

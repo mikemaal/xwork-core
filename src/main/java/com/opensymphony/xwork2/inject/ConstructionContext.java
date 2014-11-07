@@ -69,7 +69,7 @@ class ConstructionContext<T> implements Serializable {
       }
    }
 
-   static class DelegatingInvocationHandler<T> implements InvocationHandler {
+   static class DelegatingInvocationHandler<T> implements InvocationHandler, Serializable {
 
       T delegate;
 

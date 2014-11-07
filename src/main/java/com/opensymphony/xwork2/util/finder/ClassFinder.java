@@ -436,7 +436,7 @@ public class ClassFinder implements Serializable {
       return classNames;
    }
 
-   public class Annotatable {
+   public class Annotatable implements Serializable {
 
       private final List<AnnotationInfo> annotations = new ArrayList<AnnotationInfo>();
 
@@ -461,7 +461,7 @@ public class ClassFinder implements Serializable {
       List<AnnotationInfo> getAnnotations();
    }
 
-   public class PackageInfo extends Annotatable implements Info {
+   public class PackageInfo extends Annotatable implements Info, Serializable {
 
       private final String name;
 
@@ -491,7 +491,7 @@ public class ClassFinder implements Serializable {
       }
    }
 
-   public class ClassInfo extends Annotatable implements Info {
+   public class ClassInfo extends Annotatable implements Info, Serializable {
 
       private final String name;
 
@@ -577,7 +577,7 @@ public class ClassFinder implements Serializable {
       }
    }
 
-   public class MethodInfo extends Annotatable implements Info {
+   public class MethodInfo extends Annotatable implements Info, Serializable {
 
       private final ClassInfo declaringClass;
 
@@ -639,7 +639,7 @@ public class ClassFinder implements Serializable {
       }
    }
 
-   public class FieldInfo extends Annotatable implements Info {
+   public class FieldInfo extends Annotatable implements Info, Serializable {
 
       private final String name;
 
@@ -678,7 +678,7 @@ public class ClassFinder implements Serializable {
       }
    }
 
-   public class AnnotationInfo extends Annotatable implements Info {
+   public class AnnotationInfo extends Annotatable implements Info, Serializable {
 
       private final String name;
 
@@ -737,7 +737,7 @@ public class ClassFinder implements Serializable {
       }
    }
 
-   public class InfoBuildingVisitor extends EmptyVisitor {
+   public class InfoBuildingVisitor extends EmptyVisitor implements Serializable {
 
       private Info info;
 
@@ -820,7 +820,7 @@ public class ClassFinder implements Serializable {
       }
    }
 
-   private static final class DefaultClassnameFilterImpl implements Test<String> {
+   private static final class DefaultClassnameFilterImpl implements Test<String>, Serializable {
 
       public boolean test(String className) {
          return true;

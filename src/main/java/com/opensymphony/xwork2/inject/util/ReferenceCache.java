@@ -108,7 +108,7 @@ public abstract class ReferenceCache<K, V> extends ReferenceMap<K, V> implements
       future.cancel(false);
    }
 
-   class CallableCreate implements Callable<V> {
+   class CallableCreate implements Callable<V>, Serializable {
 
       K key;
 

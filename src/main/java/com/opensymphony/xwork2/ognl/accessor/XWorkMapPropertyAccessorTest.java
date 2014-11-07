@@ -39,7 +39,7 @@ public class XWorkMapPropertyAccessorTest extends XWorkTestCase implements Seria
       assertNull(vs.findValue("map['key']"));
    }
 
-   private static class MapHolder {
+   private static class MapHolder implements Serializable {
 
       private final Map map;
 

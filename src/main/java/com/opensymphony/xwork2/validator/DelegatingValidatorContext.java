@@ -226,7 +226,7 @@ public class DelegatingValidatorContext implements ValidatorContext, Serializabl
    /**
     * An implementation of LocaleProvider which gets the locale from the action context.
     */
-   private static class ActionContextLocaleProvider implements LocaleProvider {
+   private static class ActionContextLocaleProvider implements LocaleProvider, Serializable {
 
       public Locale getLocale() {
          return ActionContext.getContext().getLocale();
@@ -236,7 +236,7 @@ public class DelegatingValidatorContext implements ValidatorContext, Serializabl
    /**
     * An implementation of ValidationAware which logs errors and messages.
     */
-   private static class LoggingValidationAware implements ValidationAware {
+   private static class LoggingValidationAware implements ValidationAware, Serializable {
 
       private Logger log;
 

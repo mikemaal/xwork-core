@@ -276,7 +276,7 @@ public class LocationAttributes implements Serializable {
     * 
     * @see com.opensymphony.xwork2.util.location.LocationAttributes
     */
-   public static class Pipe implements ContentHandler {
+   public static class Pipe implements ContentHandler, Serializable {
 
       private Locator locator;
 

@@ -132,7 +132,7 @@ class ContainerImpl implements Container, Serializable {
       return Modifier.isStatic(member.getModifiers());
    }
 
-   static class FieldInjector implements Injector {
+   static class FieldInjector implements Injector, Serializable {
 
       final Field field;
 
@@ -223,7 +223,7 @@ class ContainerImpl implements Container, Serializable {
       return null;
    }
 
-   static class MethodInjector implements Injector {
+   static class MethodInjector implements Injector, Serializable {
 
       final Method method;
 
@@ -269,7 +269,7 @@ class ContainerImpl implements Container, Serializable {
       }
    };
 
-   static class ConstructorInjector<T> {
+   static class ConstructorInjector<T> implements Serializable {
 
       final Class<T> implementation;
 
@@ -392,7 +392,7 @@ class ContainerImpl implements Container, Serializable {
       }
    }
 
-   static class ParameterInjector<T> {
+   static class ParameterInjector<T> implements Serializable {
 
       final ExternalContext<T> externalContext;
 
@@ -567,7 +567,7 @@ class ContainerImpl implements Container, Serializable {
       void inject(InternalContext context, Object o);
    }
 
-   static class MissingDependencyException extends Exception {
+   static class MissingDependencyException extends Exception implements Serializable {
 
       MissingDependencyException(String message) {
          super(message);

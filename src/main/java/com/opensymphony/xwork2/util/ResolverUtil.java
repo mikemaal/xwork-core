@@ -89,7 +89,7 @@ public class ResolverUtil<T> implements Serializable {
       boolean doesMatchResource();
    }
 
-   public abstract static class ClassTest implements Test {
+   public abstract static class ClassTest implements Test, Serializable {
 
       public boolean matches(URL resource) {
          throw new UnsupportedOperationException();
@@ -104,7 +104,7 @@ public class ResolverUtil<T> implements Serializable {
       }
    }
 
-   public abstract static class ResourceTest implements Test {
+   public abstract static class ResourceTest implements Test, Serializable {
 
       public boolean matches(Class cls) {
          throw new UnsupportedOperationException();
@@ -123,7 +123,7 @@ public class ResolverUtil<T> implements Serializable {
     * A Test that checks to see if each class is assignable to the provided class. Note
     * that this test will match the parent type itself if it is presented for matching.
     */
-   public static class IsA extends ClassTest {
+   public static class IsA extends ClassTest implements Serializable {
 
       private Class parent;
 
@@ -146,7 +146,7 @@ public class ResolverUtil<T> implements Serializable {
    /**
     * A Test that checks to see if each class name ends with the provided suffix.
     */
-   public static class NameEndsWith extends ClassTest {
+   public static class NameEndsWith extends ClassTest implements Serializable {
 
       private String suffix;
 
@@ -170,7 +170,7 @@ public class ResolverUtil<T> implements Serializable {
     * A Test that checks to see if each class is annotated with a specific annotation. If it
     * is, then the test returns true, otherwise false.
     */
-   public static class AnnotatedWith extends ClassTest {
+   public static class AnnotatedWith extends ClassTest implements Serializable {
 
       private Class<? extends Annotation> annotation;
 
@@ -190,7 +190,7 @@ public class ResolverUtil<T> implements Serializable {
       }
    }
 
-   public static class NameIs extends ResourceTest {
+   public static class NameIs extends ResourceTest implements Serializable {
 
       private String name;
 

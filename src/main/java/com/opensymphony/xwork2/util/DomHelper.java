@@ -118,7 +118,7 @@ public class DomHelper implements Serializable {
     *
     * @author <a href="mailto:cziegeler@apache.org">Carsten Ziegeler</a>
     */
-   public static class DOMBuilder implements ContentHandler {
+   public static class DOMBuilder implements ContentHandler, Serializable {
 
       /** The default transformer factory shared by all instances */
       protected static SAXTransformerFactory FACTORY;
@@ -265,7 +265,7 @@ public class DomHelper implements Serializable {
       }
    }
 
-   public static class StartHandler extends DefaultHandler {
+   public static class StartHandler extends DefaultHandler implements Serializable {
 
       private ContentHandler nextHandler;
 

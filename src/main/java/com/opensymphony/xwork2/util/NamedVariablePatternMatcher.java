@@ -128,7 +128,7 @@ public class NamedVariablePatternMatcher implements PatternMatcher<NamedVariable
    /**
     * Stores the compiled pattern and the variable names matches will correspond to.
     */
-   public static class CompiledPattern {
+   public static class CompiledPattern implements Serializable {
 
       private Pattern pattern;
 

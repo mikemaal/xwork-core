@@ -414,7 +414,7 @@ public class DefaultConfiguration implements Configuration, Serializable {
                   interceptors).addExceptionMappings(packageContext.getAllExceptionMappingConfigs()).build();
    }
 
-   private static class RuntimeConfigurationImpl implements RuntimeConfiguration {
+   private static class RuntimeConfigurationImpl implements RuntimeConfiguration, Serializable {
 
       private Map<String, Map<String, ActionConfig>> namespaceActionConfigs;
 
@@ -509,7 +509,7 @@ public class DefaultConfiguration implements Configuration, Serializable {
       }
    }
 
-   class ContainerProperties extends LocatableProperties {
+   class ContainerProperties extends LocatableProperties implements Serializable {
 
       private static final long serialVersionUID = -7320625750836896089L;
 

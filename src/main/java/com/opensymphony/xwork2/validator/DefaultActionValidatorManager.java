@@ -347,7 +347,7 @@ public class DefaultActionValidatorManager implements ActionValidatorManager, Se
     * when using nested visitor. See XW-571 (nested visitor validators break short-circuit functionality)
     * at http://jira.opensymphony.com/browse/XW-571
     */
-   protected class InternalValidatorContextWrapper {
+   protected class InternalValidatorContextWrapper implements Serializable {
 
       private ValidatorContext validatorContext = null;
 

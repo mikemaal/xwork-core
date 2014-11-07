@@ -103,7 +103,7 @@ public class ModelDrivenInterceptor extends AbstractInterceptor implements Seria
    /**
     * Refreshes the model instance on the value stack, if it has changed
     */
-   protected static class RefreshModelBeforeResult implements PreResultListener {
+   protected static class RefreshModelBeforeResult implements PreResultListener, Serializable {
 
       private Object originalModel = null;
 

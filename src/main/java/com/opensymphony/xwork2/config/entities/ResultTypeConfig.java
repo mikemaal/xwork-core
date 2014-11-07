@@ -13,16 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.opensymphony.xwork2.config.entities;
 
 import com.opensymphony.xwork2.util.location.Located;
 import com.opensymphony.xwork2.util.location.Location;
-
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
-
 
 /**
  * Configuration class for result types.
@@ -35,135 +34,142 @@ import java.util.Map;
  */
 public class ResultTypeConfig extends Located implements Serializable {
 
-    protected String className;
-    protected String name;
-    protected String defaultResultParam;
-    protected Map<String,String> params;
+   protected String className;
 
-    protected ResultTypeConfig(String name, String className) {
-        this.name = name;
-        this.className = className;
-        params = new LinkedHashMap<String,String>();
-    }
+   protected String name;
 
-    protected ResultTypeConfig(ResultTypeConfig orig) {
-        this.name = orig.name;
-        this.className = orig.className;
-        this.defaultResultParam = orig.defaultResultParam;
-        this.params = orig.params;
-    }
+   protected String defaultResultParam;
 
-    public void setDefaultResultParam(String defaultResultParam) {
-        this.defaultResultParam = defaultResultParam;
-    }
-    
-    public String getDefaultResultParam() {
-        return this.defaultResultParam;
-    }
+   protected Map<String, String> params;
 
-    /**
-     * @deprecated Since 2.1, use {@link #getClassName()} instead
-     */
-    @Deprecated public String getClazz() {
-        return className;
-    }
+   protected ResultTypeConfig(String name, String className) {
+      this.name = name;
+      this.className = className;
+      params = new LinkedHashMap<String, String>();
+   }
 
-    public String getClassName() {
-        return className;
-    }
+   protected ResultTypeConfig(ResultTypeConfig orig) {
+      this.name = orig.name;
+      this.className = orig.className;
+      this.defaultResultParam = orig.defaultResultParam;
+      this.params = orig.params;
+   }
 
-    public String getName() {
-        return name;
-    }
+   public void setDefaultResultParam(String defaultResultParam) {
+      this.defaultResultParam = defaultResultParam;
+   }
 
-    public Map<String,String> getParams() {
-        return this.params;
-    }
+   public String getDefaultResultParam() {
+      return this.defaultResultParam;
+   }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+   /**
+    * @deprecated Since 2.1, use {@link #getClassName()} instead
+    */
+   @Deprecated
+   public String getClazz() {
+      return className;
+   }
 
-        final ResultTypeConfig that = (ResultTypeConfig) o;
+   public String getClassName() {
+      return className;
+   }
 
-        if (className != null ? !className.equals(that.className) : that.className != null) return false;
-        if (name != null ? !name.equals(that.name) : that.name != null) return false;
-        if (params != null ? !params.equals(that.params) : that.params != null) return false;
+   public String getName() {
+      return name;
+   }
 
-        return true;
-    }
+   public Map<String, String> getParams() {
+      return this.params;
+   }
 
-    @Override
-    public int hashCode() {
-        int result;
-        result = (className != null ? className.hashCode() : 0);
-        result = 29 * result + (name != null ? name.hashCode() : 0);
-        result = 29 * result + (params != null ? params.hashCode() : 0);
-        return result;
-    }
+   @Override
+   public boolean equals(Object o) {
+      if (this == o)
+         return true;
+      if (o == null || getClass() != o.getClass())
+         return false;
+      final ResultTypeConfig that = (ResultTypeConfig) o;
+      if (className != null ? !className.equals(that.className) : that.className != null)
+         return false;
+      if (name != null ? !name.equals(that.name) : that.name != null)
+         return false;
+      if (params != null ? !params.equals(that.params) : that.params != null)
+         return false;
+      return true;
+   }
 
-    @Override
-    public String toString() {
-        return "ResultTypeConfig: [" + name + "] => [" + className + "] " +
-                "with defaultParam [" + defaultResultParam + "] with params " + params;
-    }
+   @Override
+   public int hashCode() {
+      int result;
+      result = (className != null ? className.hashCode() : 0);
+      result = 29 * result + (name != null ? name.hashCode() : 0);
+      result = 29 * result + (params != null ? params.hashCode() : 0);
+      return result;
+   }
 
-    /**
-     * The builder for this object.  An instance of this object is the only way to construct a new instance.  The
-     * purpose is to enforce the immutability of the object.  The methods are structured in a way to support chaining.
-     * After setting any values you need, call the {@link #build()} method to create the object.
-     */
-    public static final class Builder {
-        protected ResultTypeConfig target;
+   @Override
+   public String toString() {
+      return "ResultTypeConfig: [" + name + "] => [" + className + "] " + "with defaultParam [" + defaultResultParam
+            + "] with params " + params;
+   }
 
-        public Builder(String name, String className) {
-            target = new ResultTypeConfig(name, className);
-        }
+   /**
+    * The builder for this object.  An instance of this object is the only way to construct a new instance.  The
+    * purpose is to enforce the immutability of the object.  The methods are structured in a way to support chaining.
+    * After setting any values you need, call the {@link #build()} method to create the object.
+    */
+   public static final class Builder implements Serializable {
 
-        public Builder(ResultTypeConfig orig) {
-            target = new ResultTypeConfig(orig);
-        }
+      protected ResultTypeConfig target;
 
-        public Builder name(String name) {
-            target.name = name;
-            return this;
-        }
+      public Builder(String name, String className) {
+         target = new ResultTypeConfig(name, className);
+      }
 
-        public Builder className(String name) {
-            target.className = name;
-            return this;
-        }
+      public Builder(ResultTypeConfig orig) {
+         target = new ResultTypeConfig(orig);
+      }
 
-         public Builder addParam(String name, String value) {
-            target.params.put(name, value);
-            return this;
-        }
+      public Builder name(String name) {
+         target.name = name;
+         return this;
+      }
 
-        public Builder addParams(Map<String,String> params) {
-            target.params.putAll(params);
-            return this;
-        }
+      public Builder className(String name) {
+         target.className = name;
+         return this;
+      }
 
-        public Builder defaultResultParam(String defaultResultParam) {
-            target.defaultResultParam = defaultResultParam;
-            return this;
-        }
+      public Builder addParam(String name, String value) {
+         target.params.put(name, value);
+         return this;
+      }
 
-        public Builder location(Location loc) {
-            target.location = loc;
-            return this;
-        }
+      public Builder addParams(Map<String, String> params) {
+         target.params.putAll(params);
+         return this;
+      }
 
-        public ResultTypeConfig build() {
-            embalmTarget();
-            ResultTypeConfig result = target;
-            target = new ResultTypeConfig(target);
-            return result;
-        }
+      public Builder defaultResultParam(String defaultResultParam) {
+         target.defaultResultParam = defaultResultParam;
+         return this;
+      }
 
-        protected void embalmTarget() {
-            target.params = Collections.unmodifiableMap(target.params);
-        }
-    }
+      public Builder location(Location loc) {
+         target.location = loc;
+         return this;
+      }
+
+      public ResultTypeConfig build() {
+         embalmTarget();
+         ResultTypeConfig result = target;
+         target = new ResultTypeConfig(target);
+         return result;
+      }
+
+      protected void embalmTarget() {
+         target.params = Collections.unmodifiableMap(target.params);
+      }
+   }
 }

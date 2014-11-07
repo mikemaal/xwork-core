@@ -18,7 +18,6 @@ package com.opensymphony.xwork2.config.entities;
 
 import com.opensymphony.xwork2.util.location.Located;
 import com.opensymphony.xwork2.util.location.Location;
-
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -32,149 +31,141 @@ import java.util.Map;
  */
 public class ExceptionMappingConfig extends Located implements Serializable {
 
-    protected String name;
-    protected String exceptionClassName;
-    protected String result;
-    protected Map<String,String> params;
+   protected String name;
 
-    protected ExceptionMappingConfig(String name, String exceptionClassName, String result) {
-        this.name = name;
-        this.exceptionClassName = exceptionClassName;
-        this.result = result;
-        this.params = new LinkedHashMap<String,String>();
-    }
+   protected String exceptionClassName;
 
-    protected ExceptionMappingConfig(ExceptionMappingConfig target) {
-        this.name = target.name;
-        this.exceptionClassName = target.exceptionClassName;
-        this.result = target.result;
-        this.params = new LinkedHashMap<String,String>(target.params);
-    }
+   protected String result;
 
-    public String getName() {
-        return name;
-    }
+   protected Map<String, String> params;
 
-    public String getExceptionClassName() {
-        return exceptionClassName;
-    }
+   protected ExceptionMappingConfig(String name, String exceptionClassName, String result) {
+      this.name = name;
+      this.exceptionClassName = exceptionClassName;
+      this.result = result;
+      this.params = new LinkedHashMap<String, String>();
+   }
 
-    public String getResult() {
-        return result;
-    }
+   protected ExceptionMappingConfig(ExceptionMappingConfig target) {
+      this.name = target.name;
+      this.exceptionClassName = target.exceptionClassName;
+      this.result = target.result;
+      this.params = new LinkedHashMap<String, String>(target.params);
+   }
 
-    public Map<String,String> getParams() {
-        return params;
-    }
+   public String getName() {
+      return name;
+   }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
+   public String getExceptionClassName() {
+      return exceptionClassName;
+   }
 
-        if (!(o instanceof ExceptionMappingConfig)) {
-            return false;
-        }
+   public String getResult() {
+      return result;
+   }
 
-        final ExceptionMappingConfig exceptionMappingConfig = (ExceptionMappingConfig) o;
+   public Map<String, String> getParams() {
+      return params;
+   }
 
-        if ((name != null) ? (!name.equals(exceptionMappingConfig.name)) : (exceptionMappingConfig.name != null)) {
-            return false;
-        }
+   @Override
+   public boolean equals(Object o) {
+      if (this == o) {
+         return true;
+      }
+      if (!(o instanceof ExceptionMappingConfig)) {
+         return false;
+      }
+      final ExceptionMappingConfig exceptionMappingConfig = (ExceptionMappingConfig) o;
+      if ((name != null) ? (!name.equals(exceptionMappingConfig.name)) : (exceptionMappingConfig.name != null)) {
+         return false;
+      }
+      if ((exceptionClassName != null) ? (!exceptionClassName.equals(exceptionMappingConfig.exceptionClassName))
+            : (exceptionMappingConfig.exceptionClassName != null)) {
+         return false;
+      }
+      if ((result != null) ? (!result.equals(exceptionMappingConfig.result)) : (exceptionMappingConfig.result != null)) {
+         return false;
+      }
+      if ((params != null) ? (!params.equals(exceptionMappingConfig.params)) : (exceptionMappingConfig.params != null)) {
+         return false;
+      }
+      return true;
+   }
 
-        if ((exceptionClassName != null) ? (!exceptionClassName.equals(exceptionMappingConfig.exceptionClassName)) : (exceptionMappingConfig.exceptionClassName != null))
-        {
-            return false;
-        }
+   @Override
+   public int hashCode() {
+      int hashCode;
+      hashCode = ((name != null) ? name.hashCode() : 0);
+      hashCode = (29 * hashCode) + ((exceptionClassName != null) ? exceptionClassName.hashCode() : 0);
+      hashCode = (29 * hashCode) + ((result != null) ? result.hashCode() : 0);
+      hashCode = (29 * hashCode) + ((params != null) ? params.hashCode() : 0);
+      return hashCode;
+   }
 
-        if ((result != null) ? (!result.equals(exceptionMappingConfig.result)) : (exceptionMappingConfig.result != null))
-        {
-            return false;
-        }
+   @Override
+   public String toString() {
+      return "ExceptionMappingConfig: [" + name + "] handle [" + exceptionClassName + "] to result [" + result
+            + "] with params " + params;
+   }
 
-        if ((params != null) ? (!params.equals(exceptionMappingConfig.params)) : (exceptionMappingConfig.params != null))
-        {
-            return false;
-        }
+   /**
+    * The builder for this object.  An instance of this object is the only way to construct a new instance.  The
+    * purpose is to enforce the immutability of the object.  The methods are structured in a way to support chaining.
+    * After setting any values you need, call the {@link #build()} method to create the object.
+    */
+   public static class Builder implements Serializable {
 
-        return true;
-    }
+      protected ExceptionMappingConfig target;
 
-    @Override
-    public int hashCode() {
-        int hashCode;
-        hashCode = ((name != null) ? name.hashCode() : 0);
-        hashCode = (29 * hashCode) + ((exceptionClassName != null) ? exceptionClassName.hashCode() : 0);
-        hashCode = (29 * hashCode) + ((result != null) ? result.hashCode() : 0);
-        hashCode = (29 * hashCode) + ((params != null) ? params.hashCode() : 0);
+      public Builder(ExceptionMappingConfig toClone) {
+         target = new ExceptionMappingConfig(toClone);
+      }
 
-        return hashCode;
-    }
+      public Builder(String name, String exceptionClassName, String result) {
+         target = new ExceptionMappingConfig(name, exceptionClassName, result);
+      }
 
-    @Override
-    public String toString() {
-        return "ExceptionMappingConfig: [" + name + "] handle ["
-                + exceptionClassName + "] to result [" + result + "] with params " + params;
-    }
+      public Builder name(String name) {
+         target.name = name;
+         return this;
+      }
 
-    /**
-     * The builder for this object.  An instance of this object is the only way to construct a new instance.  The
-     * purpose is to enforce the immutability of the object.  The methods are structured in a way to support chaining.
-     * After setting any values you need, call the {@link #build()} method to create the object.
-     */
-    public static class Builder{
+      public Builder exceptionClassName(String name) {
+         target.exceptionClassName = name;
+         return this;
+      }
 
-        protected ExceptionMappingConfig target;
+      public Builder result(String result) {
+         target.result = result;
+         return this;
+      }
 
-        public Builder(ExceptionMappingConfig toClone) {
-            target = new ExceptionMappingConfig(toClone);
-        }
+      public Builder addParam(String name, String value) {
+         target.params.put(name, value);
+         return this;
+      }
 
-        public Builder(String name, String exceptionClassName, String result) {
-            target = new ExceptionMappingConfig(name, exceptionClassName, result);
-        }
+      public Builder addParams(Map<String, String> params) {
+         target.params.putAll(params);
+         return this;
+      }
 
-        public Builder name(String name) {
-            target.name = name;
-            return this;
-        }
+      public Builder location(Location loc) {
+         target.location = loc;
+         return this;
+      }
 
-        public Builder exceptionClassName(String name) {
-            target.exceptionClassName = name;
-            return this;
-        }
+      public ExceptionMappingConfig build() {
+         embalmTarget();
+         ExceptionMappingConfig result = target;
+         target = new ExceptionMappingConfig(target);
+         return result;
+      }
 
-        public Builder result(String result) {
-            target.result = result;
-            return this;
-        }
-
-        public Builder addParam(String name, String value) {
-            target.params.put(name, value);
-            return this;
-        }
-
-        public Builder addParams(Map<String,String> params) {
-            target.params.putAll(params);
-            return this;
-        }
-
-        public Builder location(Location loc) {
-            target.location = loc;
-            return this;
-        }
-
-        public ExceptionMappingConfig build() {
-            embalmTarget();
-            ExceptionMappingConfig result = target;
-            target = new ExceptionMappingConfig(target);
-            return result;
-        }
-
-        protected void embalmTarget() {
-            target.params = Collections.unmodifiableMap(target.params);
-        }
-    }
-
+      protected void embalmTarget() {
+         target.params = Collections.unmodifiableMap(target.params);
+      }
+   }
 }

@@ -268,7 +268,7 @@ public class CompoundRootAccessor implements PropertyAccessor, MethodAccessor, C
       return classes;
    }
 
-   static class MethodCall {
+   static class MethodCall implements Serializable {
 
       Class clazz;
 

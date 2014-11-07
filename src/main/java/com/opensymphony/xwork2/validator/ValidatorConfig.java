@@ -109,7 +109,7 @@ public class ValidatorConfig extends Located implements Serializable {
    /**
     * Builds a ValidatorConfig
     */
-   public static final class Builder {
+   public static final class Builder implements Serializable {
 
       private ValidatorConfig target;
 

@@ -172,7 +172,7 @@ public class I18nInterceptor extends AbstractInterceptor implements Serializable
       return locale;
    }
 
-   protected class LocaleFinder {
+   protected class LocaleFinder implements Serializable {
 
       protected String storage = Storage.SESSION.toString();
 

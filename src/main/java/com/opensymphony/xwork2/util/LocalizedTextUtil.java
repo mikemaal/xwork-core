@@ -793,7 +793,7 @@ public class LocalizedTextUtil implements Serializable {
       messageFormats.clear();
    }
 
-   static class MessageFormatKey {
+   static class MessageFormatKey implements Serializable {
 
       String pattern;
 
@@ -827,7 +827,7 @@ public class LocalizedTextUtil implements Serializable {
       }
    }
 
-   static class GetDefaultMessageReturnArg {
+   static class GetDefaultMessageReturnArg implements Serializable {
 
       String message;
 
@@ -839,7 +839,7 @@ public class LocalizedTextUtil implements Serializable {
       }
    }
 
-   private static class EmptyResourceBundle extends ResourceBundle {
+   private static class EmptyResourceBundle extends ResourceBundle implements Serializable {
 
       @Override
       public Enumeration<String> getKeys() {
